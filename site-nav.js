@@ -16,43 +16,10 @@
     { label: 'About', href: '/about', match: function (p) { return p === '/about'; } }
   ];
   var WORK = [
-    { name: 'Product & UX', short: 'Apps and case studies', items: [
-      ['Ecoverse', '/works/ecoverse-turn-everyday-actions-into-climate-impact', 'Latest'],
-      ['Keeper', '/works/keeper-subscription-management-app'],
-      ['Imperial English Flashcards', '/works/flashcards-for-imperial-english-uk'],
-      ['App Demo Video', '/works/app-demo-video']
-    ] },
-    { name: 'Research & Data', short: 'Papers and visualization', items: [
-      ['Publications', '/publications'],
-      ['Railway Accident Data', '/works/data-visualization-of-railway-network-with-accidents'],
-      ['Data Manifestation Model', '/works/data-manifestation-model'],
-      ['Ethnographic Visualization', '/works/ethnographic-visualization']
-    ] },
-    { name: 'Brand & Motion', short: 'Identity, campaigns, video', items: [
-      ['Rent The Runway', '/works/brand-identity-redesign-rtr'],
-      ['Event Graphic Design', '/works/event-graphic-design'],
-      ['Marketing Poster & Standee', '/works/marketing-poster-standee'],
-      ['Festival Social Posts', '/works/social-media-post-for-festivals'],
-      ['Reel Ads', '/works/reel-ads'],
-      ['Instagram Story Video', '/works/instagram-story-video'],
-      ['Testimonial Video', '/works/testimonial-video']
-    ] },
-    { name: 'Art & Film', short: 'Painting, illustration, film', items: [
-      ['The Plague Story', '/works/the-plague-story-folktale'],
-      ['A Non-Fiction Short Film', '/works/a-non-fiction-short-film'],
-      ['Watercolour Birds Series', '/works/watercolour-birds-series'],
-      ['Canvas Painting', '/works/canvas-painting'],
-      ['Digital Art', '/works/digital-art'],
-      ['Digital Recreation', '/works/digital-recreation'],
-      ["Intellect's Dilemma", '/works/intellects-dilemma'],
-      ['Caricature Calendar', '/works/caricature-calendar'],
-      ['Spotify Album Cover Art', '/works/spotify-album-cover-art'],
-      ['Photo Replication', '/works/photo-replication']
-    ] },
-    { name: 'Memento', short: 'Keepsakes in 3D and AR', items: [
-      ['Silver Jubilee Memento', '/works/silver-jubilee-memento', 'New'],
-      ['Bird Flip Calendar', '/works/bird-flip-calendar', 'New']
-    ] }
+    { name: 'Design', short: 'Apps, brands, motion, 3D', items: [['Explore Design', '/design/']] },
+    { name: 'Fine Arts', short: 'Painting, illustration, film', items: [['Explore Fine Arts', '/fine-arts/']] },
+    { name: 'Photography', short: 'Birds, wildlife, astro, street', items: [['Explore Photography', '/photography/']] },
+    { name: 'Research', short: 'Papers and visualization', items: [['Explore Research', '/publications/']] }
   ];
   var TOPICS = ['UI/UX & product', 'Brand identity', 'Research', 'Illustration', 'Motion & film', 'Something else'];
 

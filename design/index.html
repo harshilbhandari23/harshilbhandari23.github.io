@@ -1,0 +1,158 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="preload" href="/fonts/hb-serif/newsreader-latin-300-normal.woff2" as="font" crossorigin="" type="font/woff2"/>
+<link rel="stylesheet" href="/base.css"/>
+<title>Design - Harshil Bhandari</title><meta name="description" content="Design work by Harshil Bhandari: app case studies, brand identity, advertising and motion graphics, and interactive 3D and AR keepsakes."/>
+<link rel="icon" href="/favicon.ico" type="image/x-icon"/>
+<style>
+:root{--line:#e5e7eb;--ink:#030712;--muted:#6b7280;--soft:#9ca3af}
+.cs-wrap{background:#fff;padding:0 16px}
+.cs{position:relative;max-width:64rem;margin:64px auto 0;border:1px solid var(--line);border-bottom:0}
+.cs-plus{position:absolute;font-family:monospace;font-size:13px;line-height:1;color:#9ca3af;z-index:10;user-select:none;pointer-events:none}
+.cs-plus.tl{left:0;top:0;transform:translate(-50%,-50%)}.cs-plus.tr{right:0;top:0;transform:translate(50%,-50%)}
+.cs-plus.bl{left:0;bottom:0;transform:translate(-50%,50%)}.cs-plus.br{right:0;bottom:0;transform:translate(50%,50%)}
+.cs-row{position:relative;border-bottom:1px solid var(--line)}
+.cs-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 40px;background:#fff}
+.cs-head .thumb{width:48px;height:48px;object-fit:cover}
+.cs-head h1{font-family:HBSerif,serif;font-weight:300;font-size:clamp(24px,3.4vw,36px);letter-spacing:-.025em;color:#171717;text-align:center;margin:0}
+.cs-head .mark{width:40px;height:40px;object-fit:contain;opacity:.2}
+.cs-meta{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.cs-meta>div{padding:16px 32px 18px;border-right:1px solid var(--line)}.cs-meta>div:last-child{border-right:0}
+.cs-label{font-family:FunnelDisplay,sans-serif;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#6b7280;margin:0 0 4px}
+.cs-val{font-family:FunnelDisplay,sans-serif;font-size:12px;line-height:1.6;color:#111827;margin:0}
+.cs-hero{display:block;width:100%;height:460px;object-fit:cover;background:#f5f5f5}
+.cs-brief{padding:40px}
+.cs-kicker{font-family:FunnelDisplay,sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#9ca3af;margin:0 0 16px}
+.cs-title{font-family:HBSerif,serif;font-weight:300;font-size:clamp(26px,3.6vw,36px);line-height:1.25;color:#000;margin:0 0 24px;max-width:46rem}
+.cs-body{font-family:FunnelDisplay,sans-serif;font-size:14px;line-height:1.65;color:var(--muted);max-width:42rem;margin:0 0 14px}
+.cs-sec{padding:24px 40px;font-family:HBSerif,serif;font-weight:300;font-size:30px;color:#000;margin:0}
+.cs-img{display:block;width:100%;height:auto}
+.cs-stack .cs-img{margin:0}
+.cs-gallery{columns:2;column-gap:1px;background:var(--line)}
+.cs-gallery figure{break-inside:avoid;margin:0 0 1px;background:#fff}
+.cs-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--line)}
+.cs-grid img{display:block;width:100%;height:100%;object-fit:cover;background:#fff}
+.cs-embed.cs-live{aspect-ratio:16/10;background:#e9e7e2}
+@media (max-width:767px){.cs-embed.cs-live{aspect-ratio:1/1}}
+.cs-embed{position:relative;aspect-ratio:16/9;background:#111}.cs-embed iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.cs-text{padding:32px 40px;font-family:FunnelDisplay,sans-serif;font-size:14px;line-height:1.7;color:var(--muted);white-space:pre-line}
+.cs-team{display:flex;flex-wrap:wrap;gap:8px;padding:0 40px 32px}
+.cs-chip{font-family:FunnelDisplay,sans-serif;font-size:12px;color:#374151;border:1px solid var(--line);padding:6px 12px;background:#fafafa}
+.cs-btn{display:inline-flex;align-items:center;gap:8px;border:1px solid #111827;padding:8px 16px;font-family:FunnelDisplay,sans-serif;font-size:12px;color:#111827;text-decoration:none;transition:background .2s,color .2s}
+.cs-btn:hover{background:#111827;color:#fff}
+.cs-cta{display:grid;grid-template-columns:1fr auto;gap:40px;padding:56px 40px;border:1px solid var(--line);border-top:0;max-width:64rem;margin:0 auto;position:relative;background:#fff}
+.cs-cta h2{font-family:HBSerif,serif;font-weight:300;font-size:36px;line-height:1.2;margin:16px 0 12px;color:#000}
+.cs-links{display:flex;flex-direction:column;gap:12px;min-width:205px}
+.cs-links a{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--line);padding:12px 18px;font-family:FunnelDisplay,sans-serif;font-size:12px;color:#111827;text-decoration:none;transition:border-color .2s,transform .2s}
+.cs-links a:hover{border-color:#111827;transform:translateX(2px)}
+.cs-more{max-width:64rem;margin:56px auto 0}
+.cs-more h2{text-align:center;font-family:HBSerif,serif;font-weight:400;font-size:30px;margin:0 0 24px}
+.cs-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.cs-card{display:block;text-decoration:none}
+.cs-card .pic{aspect-ratio:16/9;overflow:hidden;border:1px solid var(--line);background:#fafafa}
+.cs-card img{width:100%;height:100%;object-fit:cover;transition:transform .6s cubic-bezier(.2,.7,.2,1)}
+.cs-card:hover img{transform:scale(1.04)}
+.cs-card p{margin:8px 0 0;text-align:center;font-family:HBSerif,serif;font-weight:300;font-size:14px;color:#000}
+.cs-card span{display:block;text-align:center;font-family:FunnelDisplay,sans-serif;font-size:10px;color:#9ca3af;margin-top:2px}
+.cs-rail{position:fixed;left:0;top:50%;transform:translateY(-50%);width:32px;border:1px solid #d1d5db;border-left:0;border-radius:0;z-index:9998;pointer-events:none;display:none}
+.cs-side{position:fixed;left:26px;top:50%;transform:translateY(-50%);z-index:9999;display:none;flex-direction:column}
+.cs-side button{all:unset;cursor:pointer;display:flex;align-items:center;gap:12px;padding:6px 0;font-family:FunnelDisplay,sans-serif}
+.cs-side .mk{width:11px;height:11px;background:#fff;display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:11px;color:#9ca3af}
+.cs-side .mk i{display:none;width:7px;height:7px;background:#111827}
+.cs-side b{font-weight:400;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:#9ca3af;white-space:nowrap;transition:color .2s}
+.cs-side button:hover b{color:#4b5563}
+.cs-side button.on .mk i{display:block}.cs-side button.on .mk em{display:none}
+.cs-side button.on b{color:#030712;font-weight:600}
+@media (min-width:1280px){.cs-rail{display:block}.cs-side{display:flex}}
+.cs-reveal{opacity:0;transform:translateY(28px);transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1)}
+.cs-reveal.in{opacity:1;transform:none}
+.cs-fade{animation:csFade .8s cubic-bezier(.2,.7,.2,1) both}
+@keyframes csFade{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.cs-reveal,.cs-fade{opacity:1;transform:none;animation:none;transition:none}}
+.about-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:0}
+.pc-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);border-top:1px solid var(--line)}
+.pc-grid.no-model{grid-template-columns:minmax(0,1fr)}.pc-grid.no-model .pc-model{display:none}
+.pc-model{position:relative;min-height:440px;border-right:1px solid var(--line);color:#111827}
+.pc-model canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab;touch-action:pan-y;color:#111827}
+.pc-model canvas.is-drag{cursor:grabbing}
+.pc-hint{position:absolute;left:16px;bottom:12px;margin:0;font-family:FunnelDisplay,sans-serif;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#9ca3af;pointer-events:none}
+.pc-info{padding:28px 32px 32px;min-width:0}
+.pc-info h3{margin:0 0 4px;font-family:HBSerif,serif;font-weight:300;font-size:30px;line-height:1.15;color:#000}
+.pc-sub{margin:0 0 18px;font-family:FunnelDisplay,sans-serif;font-size:13px;color:#6b7280}
+.pc-specs{margin:0 0 20px;border-top:1px solid var(--line)}
+.pc-specs div{display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;padding:9px 0;border-bottom:1px solid var(--line)}
+.pc-specs dt{font-family:FunnelDisplay,sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#9ca3af;padding-top:2px}
+.pc-specs dd{margin:0;font-family:FunnelDisplay,sans-serif;font-size:13px;line-height:1.45;color:#111827}
+.ph-jump{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}.ph-jump a{text-decoration:none}
+.ph-sub{scroll-margin-top:84px}
+.ph-grid{column-count:3;column-gap:14px;padding:0 40px 40px}
+.ph-item{all:unset;box-sizing:border-box;display:block;position:relative;width:100%;margin:0 0 14px;break-inside:avoid;cursor:zoom-in;overflow:hidden;background:#f3f4f6}
+.ph-item img{display:block;width:100%;height:auto;transition:transform .9s cubic-bezier(.2,.7,.2,1)}
+.ph-item span{position:absolute;left:0;right:0;bottom:0;padding:22px 12px 10px;font-family:FunnelDisplay,sans-serif;font-size:12px;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.6));opacity:0;transition:opacity .25s}
+.ph-item:focus-visible{outline:2px solid #f97316;outline-offset:2px}
+@media (hover:hover){.ph-item:hover img{transform:scale(1.03)}.ph-item:hover span{opacity:1}}
+.ph-empty{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;padding:0 40px 40px}
+.ph-empty div{aspect-ratio:4/3;border:1px solid var(--line);display:flex;align-items:flex-end;padding:12px;font-family:FunnelDisplay,sans-serif;font-size:12px;color:#9ca3af}
+.ph-lb{position:fixed;inset:0;z-index:10020;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.93);padding:56px 64px}
+.ph-lb.on{display:flex}
+.ph-lb figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:12px;max-width:100%;max-height:100%}
+.ph-lb img{display:block;max-width:100%;max-height:calc(100vh - 150px);object-fit:contain}
+.ph-lb figcaption{font-family:FunnelDisplay,sans-serif;font-size:13px;color:#e5e7eb;text-align:center}
+.ph-lb button{all:unset;box-sizing:border-box;position:absolute;display:flex;align-items:center;justify-content:center;width:44px;height:44px;border:1px solid rgba(255,255,255,.35);color:#fff;font:400 18px/1 FunnelDisplay,sans-serif;cursor:pointer;transition:background .2s,color .2s}
+.ph-lb button:hover{background:#fff;color:#111827}.ph-lb button:focus-visible{outline:2px solid #f97316;outline-offset:2px}
+.ph-lb .x{top:14px;right:14px}.ph-lb .p{left:14px;top:50%;margin-top:-22px}.ph-lb .n{right:14px;top:50%;margin-top:-22px}
+html[data-theme="dark"] .ph-lb{background:rgba(255,255,255,.93)}
+html[data-theme="dark"] .ph-lb figcaption{color:#1f2937}
+html[data-theme="dark"] .ph-lb button{border-color:rgba(0,0,0,.35);color:#000}
+html[data-theme="dark"] .ph-lb button:hover{background:#000;color:#fff}
+@media (max-width:767px){.pc-grid{grid-template-columns:minmax(0,1fr)}.pc-model{min-height:320px;border-right:0;border-bottom:1px solid var(--line)}.pc-info{padding:22px 20px 28px}.ph-grid{column-count:2;column-gap:10px;padding:0 20px 28px}.ph-item{margin-bottom:10px}.ph-empty{gap:10px;padding:0 20px 28px}.ph-lb{padding:64px 12px}.ph-lb .p,.ph-lb .n{top:auto;bottom:14px;margin:0}.ph-lb .p{left:calc(50% - 52px)}.ph-lb .n{right:calc(50% - 52px)}}
+.about-grid>div{padding:40px}.about-grid>div+div{border-left:1px solid var(--line)}
+.about-name{font-size:clamp(48px,7vw,84px);line-height:1;letter-spacing:-.02em;color:#000;margin:0 0 20px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 28px}
+.cs-links a.lk{gap:14px}
+.lk-main{display:flex;align-items:center;gap:12px;min-width:0}
+.lk .ico{flex:0 0 auto;color:#6b7280;transition:color .25s,transform .35s cubic-bezier(.2,.7,.2,1)}
+.lk small{font-family:FunnelDisplay,sans-serif;font-size:10px;letter-spacing:.04em;color:#9ca3af;white-space:nowrap}
+.cs-links a.lk:hover .ico{color:var(--brand);transform:scale(1.12)}
+.lk-go{color:#9ca3af;transition:color .25s}.cs-links a.lk:hover .lk-go{color:#111827}
+.about-photo{position:relative;margin:0 0 28px;max-width:300px;aspect-ratio:4/5;overflow:hidden;border:1px solid var(--line);background:#f3f4f6}
+.about-photo img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 20%;filter:grayscale(.25) contrast(1.02);transition:filter .6s,transform .9s cubic-bezier(.2,.7,.2,1)}
+.about-photo:hover img{filter:none;transform:scale(1.03)}
+.about-photo figcaption{position:absolute;left:0;right:0;bottom:0;padding:22px 14px 10px;font-family:FunnelDisplay,sans-serif;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#fff;background:linear-gradient(transparent,rgba(3,7,18,.55))}
+.about-photo .cs-plus{color:#fff;mix-blend-mode:difference}
+@media (max-width:767px){.about-photo{max-width:100%}}
+.tl-row{display:grid;grid-template-columns:200px 1fr;gap:24px;padding:20px 40px;border-top:1px solid var(--line)}
+.tl-row:first-of-type{border-top:0}
+.tl-row .when{font-family:FunnelDisplay,sans-serif;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#9ca3af;padding-top:4px}
+.tl-row h3{font-family:HBSerif,serif;font-weight:300;font-size:22px;line-height:1.25;color:#000;margin:0 0 4px}
+.tl-row .org{font-family:FunnelDisplay,sans-serif;font-size:13px;color:#374151;margin:0 0 2px}
+.tl-row .where{font-family:FunnelDisplay,sans-serif;font-size:12px;color:#9ca3af;margin:0 0 8px}
+.tl-row .note{font-family:FunnelDisplay,sans-serif;font-size:13px;line-height:1.65;color:var(--muted);margin:0 0 10px;max-width:40rem}
+.svc{display:flex;flex-wrap:wrap;gap:8px;padding:0 40px 32px}
+@media (max-width:767px){
+ .tl-row{grid-template-columns:1fr;gap:6px;padding:18px 20px}.svc{padding:0 20px 28px}
+ .cs-head{padding:12px 20px}.cs-head .thumb{width:40px;height:40px}.cs-head .mark{width:32px;height:32px}
+ .cs-meta{grid-template-columns:1fr 1fr}.cs-meta>div{padding:14px 20px;border-bottom:1px solid var(--line)}
+ .cs-hero{height:260px}.cs-brief,.cs-text{padding:28px 20px}.cs-sec{padding:20px}
+ .cs-gallery{columns:1}.cs-grid{grid-template-columns:1fr}
+ .cs-cta{grid-template-columns:1fr;padding:40px 20px}.cs-cta h2{font-size:28px}
+ .cs-cards{grid-template-columns:1fr}
+ .about-grid{grid-template-columns:1fr}.about-grid>div{padding:28px 20px}.about-grid>div+div{border-left:0;border-top:1px solid var(--line)}
+}
+</style><script src="/theme.js"></script><script src="/page-loader.js"></script><script src="/site-nav.js"></script></head>
+<body><div class="cs-rail" style="height:120px"></div><nav class="cs-side" aria-label="Sections"><button data-target="overview" class="on"><span class="mk"><em>+</em><i></i></span><b>Overview</b></button><button data-target="projects" class=""><span class="mk"><em>+</em><i></i></span><b>Projects</b></button><button data-target="contact" class=""><span class="mk"><em>+</em><i></i></span><b>Contact</b></button></nav><main><div class="cs-wrap"><div class="cs cs-fade"><span class="cs-plus tl">+</span><span class="cs-plus tr">+</span><div class="cs-row cs-head"><span class="cs-plus bl">+</span><span class="cs-plus br">+</span><img class="thumb" src="/images/mine/hb-filled.svg" alt="" style="object-fit:contain"/><h1>Design</h1><img class="mark" src="/images/mine/hb.svg" alt="HB"/></div><div id="overview" class="cs-row cs-brief"><span class="cs-plus bl">+</span><span class="cs-plus br">+</span><p class="cs-kicker cs-reveal">13 projects</p><h2 class="cs-title cs-reveal">Apps, brands, motion and interactive 3D.</h2><p class="cs-body cs-reveal">Case studies in product and UX, brand identity, advertising and motion graphics, and interactive 3D and AR keepsakes.</p></div></div></div><section id="projects" class="cs-more"><h2 class="cs-reveal">Design Projects</h2><div class="cs-cards"><a class="cs-card cs-reveal" href="/works/ecoverse-turn-everyday-actions-into-climate-impact"><div class="pic"><img loading="lazy" src="/images/mine/projects/247157247/cover.webp" alt="Ecoverse"/></div><p>Ecoverse</p><span>UI/UX · Education</span></a><a class="cs-card cs-reveal" href="/works/silver-jubilee-memento"><div class="pic"><img loading="lazy" src="/images/mine/projects/silver-jubilee-memento/cover.jpg" alt="Silver Jubilee Memento"/></div><p>Silver Jubilee Memento</p><span>Memento · 3D</span></a><a class="cs-card cs-reveal" href="/works/bird-flip-calendar"><div class="pic"><img loading="lazy" src="/images/mine/projects/bird-flip-calendar/cover.jpg" alt="Bird Flip Calendar"/></div><p>Bird Flip Calendar</p><span>Memento · 3D</span></a><a class="cs-card cs-reveal" href="/works/keeper-subscription-management-app"><div class="pic"><img loading="lazy" src="/images/mine/projects/208908513/cover.webp" alt="Keeper"/></div><p>Keeper</p><span>UI/UX</span></a><a class="cs-card cs-reveal" href="/works/brand-identity-redesign-rtr"><div class="pic"><img loading="lazy" src="/images/mine/projects/217455067/cover.webp" alt="Rent The Runway"/></div><p>Rent The Runway</p><span>Graphic Design</span></a><a class="cs-card cs-reveal" href="/works/social-media-post-for-festivals"><div class="pic"><img loading="lazy" src="/images/mine/projects/200105551/cover.webp" alt="Festival Social Posts"/></div><p>Festival Social Posts</p><span>Graphic Design · Illustration</span></a><a class="cs-card cs-reveal" href="/works/event-graphic-design"><div class="pic"><img loading="lazy" src="/images/mine/projects/200114995/cover.webp" alt="Event Graphic Design"/></div><p>Event Graphic Design</p><span>Advertising · Branding</span></a><a class="cs-card cs-reveal" href="/works/marketing-poster-standee"><div class="pic"><img loading="lazy" src="/images/mine/projects/200115135/cover.webp" alt="Marketing Poster &amp; Standee"/></div><p>Marketing Poster &amp; Standee</p><span>Advertising · Branding</span></a><a class="cs-card cs-reveal" href="/works/flashcards-for-imperial-english-uk"><div class="pic"><img loading="lazy" src="/images/mine/projects/197288719/cover.webp" alt="Imperial English Flashcards"/></div><p>Imperial English Flashcards</p><span>Product Design · Graphic Design</span></a><a class="cs-card cs-reveal" href="/works/testimonial-video"><div class="pic"><img loading="lazy" src="/images/mine/projects/200063135/cover.webp" alt="Testimonial Video"/></div><p>Testimonial Video</p><span>Advertising · Motion Graphics</span></a><a class="cs-card cs-reveal" href="/works/app-demo-video"><div class="pic"><img loading="lazy" src="/images/mine/projects/200063959/cover.webp" alt="App Demo Video"/></div><p>App Demo Video</p><span>Advertising · Infographic</span></a><a class="cs-card cs-reveal" href="/works/instagram-story-video"><div class="pic"><img loading="lazy" src="/images/mine/projects/200114637/cover.webp" alt="Instagram story video"/></div><p>Instagram story video</p><span>Advertising · Branding</span></a><a class="cs-card cs-reveal" href="/works/reel-ads"><div class="pic"><img loading="lazy" src="/images/mine/projects/200114847/cover.webp" alt="Reel Ads"/></div><p>Reel Ads</p><span>Advertising · Branding</span></a></div></section><section id="contact" class="cs-cta"><span class="cs-plus tl">+</span><span class="cs-plus tr">+</span><span class="cs-plus bl">+</span><span class="cs-plus br">+</span><div class="cs-reveal"><p class="cs-kicker" style="margin:0">Let&#x27;s Work Together</p><img src="/images/mine/hb.svg" alt="HB" width="48" height="46" style="margin-top:16px"/><h2>Good work starts with the right conversation.</h2><p class="cs-body" style="margin:0">Have a project in mind, or want to talk about one of these? I&#x27;m available for freelance work.</p></div><div class="cs-links cs-reveal"><a href="mailto:harshilbhandari22@gmail.com">Say hello <span>↗</span></a><a href="mailto:harshilbhandari22@gmail.com">harshilbhandari22@gmail.com <span>✉</span></a><a href="https://www.linkedin.com/in/harshilbhandari/" target="_blank" rel="noopener">LinkedIn <span>↗</span></a></div></section></main><footer class="pf"><div class="pf-top"><p class="pf-name" aria-hidden="true"><i>H</i>arshil</p><p class="pf-role">Communication Designer &amp; Researcher</p><a class="pf-mail" href="mailto:harshilbhandari22@gmail.com">harshilbhandari22@gmail.com</a></div><div class="pf-bar"><div class="pf-id"><img src="/images/mine/hb.svg" alt="HB"/><span>© 2026 Harshil Bhandari</span></div><nav aria-label="Footer"><a href="/#work">Work</a><a href="/about/">About</a><a href="/photography/">Photography</a><a href="/publications/">Publications</a></nav><nav aria-label="Elsewhere"><a href="https://www.linkedin.com/in/harshilbhandari/" target="_blank" rel="noopener">LinkedIn</a><a href="https://www.instagram.com/harshilbhandari" target="_blank" rel="noopener">Instagram</a><a href="https://www.behance.net/harshilbhandari22" target="_blank" rel="noopener">Behance</a></nav></div></footer>
+<script>
+(function(){
+  // reveal blocks as they scroll into view (plain position checks, so nothing can stay hidden)
+  var pending=[].slice.call(document.querySelectorAll('.cs-reveal'));
+  var reveal=function(){var lim=window.innerHeight*0.92;pending=pending.filter(function(el){if(el.getBoundingClientRect().top<lim){el.classList.add('in');return false}return true})};
+  reveal();window.addEventListener('scroll',reveal,{passive:true});window.addEventListener('resize',reveal);window.addEventListener('load',reveal);
+  var btns=[].slice.call(document.querySelectorAll('.cs-side button'));
+  btns.forEach(function(b){b.addEventListener('click',function(){var t=document.getElementById(b.dataset.target);if(t)t.scrollIntoView({behavior:'smooth',block:'start'})})});
+  if(btns.length){
+    var secs=btns.map(function(b){return document.getElementById(b.dataset.target)});
+    var set=function(){var y=window.scrollY+window.innerHeight*0.35,cur=0;secs.forEach(function(s,i){if(s&&s.offsetTop<=y)cur=i});btns.forEach(function(b,i){b.classList.toggle('on',i===cur)})};
+    window.addEventListener('scroll',set,{passive:true});set();
+  }
+})();
+</script></body></html>

@@ -13,17 +13,19 @@
 (function () {
   var FILTERS = [
     { id: 'all', name: 'All' },
-    { id: 'product', name: 'Product & UX', intro: 'App case studies and product work, including Ecoverse, an AI-powered climate app.' },
-    { id: 'research', name: 'Research & Data', intro: 'Papers, data visualization, infographics and 3D models that give research a visible form.', extra: [{ name: 'Publications', href: '/publications' }] },
-    { id: 'brand', name: 'Brand & Motion', intro: 'Brand identity, advertising and motion graphics for campaigns, events and social media.' },
-    { id: 'art', name: 'Art & Film', intro: 'Painting, illustration, digital art and film, from canvas and watercolour to a short film.' },
-    { id: 'memento', name: 'Memento', intro: 'Keepsakes for the Dhirubhai Ambani University Silver Jubilee, made interactive in 3D and AR.' }
+    { id: 'design', name: 'Design', href: '/design/', intro: 'App case studies, brand identity, advertising and motion graphics, and interactive 3D and AR keepsakes.' },
+    { id: 'fine', name: 'Fine Arts', href: '/fine-arts/', intro: 'Painting, illustration, digital art and film, from canvas and watercolour to a short film.' },
+    { id: 'photo', name: 'Photography', href: '/photography/', overviewOnly: true, intro: 'Birds, wildlife, night skies, streets and landscapes, with a profile of the Nikon Z6III I shoot with.' },
+    { id: 'research', name: 'Research', href: '/publications/', intro: 'Papers, conference talks, data visualization and 3D models that give research a visible form.' }
   ];
+
+
+
 
   var AUTOPLAY_MS = 4500;
 
   var INTRO = {
-    statement: 'Work that runs from app case studies and research to brand identity, film and painting.',
+    statement: 'Work across four areas: design, fine arts, photography and research.',
     text: 'I am a doctoral scholar at Dhirubhai Ambani University and a Junior Research Fellow at its Smart Energy Learning Centre. I work across UI/UX, interaction design, digital heritage and XR/AR, with a focus on sustainability and inclusive design.',
     allWork: { label: 'View all my work', href: '/#work' },
     about: { label: 'About me', href: '/about' }
@@ -32,57 +34,57 @@
   function cover(id) { return '/images/mine/projects/' + id + '/cover.webp'; }
 
   var PROJECTS = [
-    { name: 'Ecoverse', cat: 'product', year: '2026', slug: 'ecoverse-turn-everyday-actions-into-climate-impact', img: '/images/mine/ecoverse.webp',
+    { name: 'Ecoverse', cat: 'design', year: '2026', slug: 'ecoverse-turn-everyday-actions-into-climate-impact', img: '/images/mine/ecoverse.webp',
       text: 'An AI-powered app that turns everyday actions into climate impact. Built with the Double Diamond process and aligned with UN SDGs 7, 12 and 13.' },
-    { name: 'Silver Jubilee Memento', cat: 'memento', year: '2026', slug: 'silver-jubilee-memento', img: '/images/mine/projects/silver-jubilee-memento/cover.jpg',
+    { name: 'Silver Jubilee Memento', cat: 'design', year: '2026', slug: 'silver-jubilee-memento', img: '/images/mine/projects/silver-jubilee-memento/cover.jpg',
       text: 'An interactive 3D model of a layered memento for the Dhirubhai Ambani University Silver Jubilee, viewable in your room in AR.' },
-    { name: 'Bird Flip Calendar', cat: 'memento', year: '2026', slug: 'bird-flip-calendar', img: '/images/mine/projects/bird-flip-calendar/cover.jpg',
+    { name: 'Bird Flip Calendar', cat: 'design', year: '2026', slug: 'bird-flip-calendar', img: '/images/mine/projects/bird-flip-calendar/cover.jpg',
       text: 'An interactive 3D flip calendar of bird illustrations for the Silver Jubilee. Turn the pages, or view it in your room in AR.' },
-    { name: 'Keeper', cat: 'product', year: '2025', slug: 'keeper-subscription-management-app', img: '/images/mine/keeper.webp', pos: '100% 50%',
+    { name: 'Keeper', cat: 'design', year: '2025', slug: 'keeper-subscription-management-app', img: '/images/mine/keeper.webp', pos: '100% 50%',
       text: 'UI/UX design for a subscription management app, designed in Figma.' },
     { name: 'Railway Accident Data', cat: 'research', year: '2025', slug: 'data-visualization-of-railway-network-with-accidents', img: '/images/mine/railway.webp', pos: '0% 50%',
       text: 'Data visualization and infographic design that maps a railway network alongside its accident records.' },
-    { name: 'The Plague Story', cat: 'art', year: '2023', slug: 'the-plague-story-folktale', img: '/images/mine/plague.webp',
+    { name: 'The Plague Story', cat: 'fine', year: '2023', slug: 'the-plague-story-folktale', img: '/images/mine/plague.webp',
       text: 'A Bengali folktale retold in Patachitra art blended with Phad, through illustration, character design and motion.' },
-    { name: 'Rent The Runway', cat: 'brand', year: '2025', slug: 'brand-identity-redesign-rtr', img: cover('217455067'), pos: '0% 50%',
+    { name: 'Rent The Runway', cat: 'design', year: '2025', slug: 'brand-identity-redesign-rtr', img: cover('217455067'), pos: '0% 50%',
       text: 'Brand identity redesign and brand guidelines for Rent The Runway: logo, typography, colour palette and brand applications.' },
     { name: 'Data Manifestation Model', cat: 'research', year: '2024', slug: 'data-manifestation-model', img: '/images/mine/data-manifestation.webp',
       text: 'A 3D data-visualization model that gives a dataset a physical form.' },
     { name: 'Ethnographic Visualization', cat: 'research', year: '2024', slug: 'ethnographic-visualization', img: '/images/mine/ethnographic.webp',
       text: 'An infographic built from ethnographic research at a fruit market.' },
-    { name: 'Canvas Painting', cat: 'art', year: '2024', slug: 'canvas-painting', img: '/images/mine/canvas-painting.jpeg',
+    { name: 'Canvas Painting', cat: 'fine', year: '2024', slug: 'canvas-painting', img: '/images/mine/canvas-painting.jpeg',
       text: 'Paintings on canvas: hands-on fine-art practice away from the screen.' },
-    { name: 'Spotify Album Cover Art', cat: 'art', year: '2024', slug: 'spotify-album-cover-art', img: '/images/mine/spotify.webp',
+    { name: 'Spotify Album Cover Art', cat: 'fine', year: '2024', slug: 'spotify-album-cover-art', img: '/images/mine/spotify.webp',
       text: 'Concept covers and canvas art for albums.' },
-    { name: "Intellect's Dilemma", cat: 'art', year: '2024', slug: 'intellects-dilemma', img: '/images/mine/intellects-dilemma.webp',
+    { name: "Intellect's Dilemma", cat: 'fine', year: '2024', slug: 'intellects-dilemma', img: '/images/mine/intellects-dilemma.webp',
       text: 'A 3D-modelled fine-art piece.' },
-    { name: 'A Non-Fiction Short Film', cat: 'art', year: '2025', slug: 'a-non-fiction-short-film', img: '/images/mine/short-film.webp',
+    { name: 'A Non-Fiction Short Film', cat: 'fine', year: '2025', slug: 'a-non-fiction-short-film', img: '/images/mine/short-film.webp',
       text: 'An interview-led short film, shot and edited.' },
-    { name: 'Digital Art', cat: 'art', year: '2024', slug: 'digital-art', img: cover('196615609'),
+    { name: 'Digital Art', cat: 'fine', year: '2024', slug: 'digital-art', img: cover('196615609'),
       text: 'Digital illustration and painting, made in Illustrator, Photoshop and Procreate.' },
-    { name: 'Watercolour Birds Series', cat: 'art', year: '2024', slug: 'watercolour-birds-series', img: cover('196743767'),
+    { name: 'Watercolour Birds Series', cat: 'fine', year: '2024', slug: 'watercolour-birds-series', img: cover('196743767'),
       text: 'Hand-painted watercolour birds from the Dhirubhai Ambani University campus, selected for the Birds of DAU Calendar.' },
-    { name: 'Photo Replication', cat: 'art', year: '2024', slug: 'photo-replication', img: cover('200126039'),
+    { name: 'Photo Replication', cat: 'fine', year: '2024', slug: 'photo-replication', img: cover('200126039'),
       text: 'A portrait photography and styling study.' },
-    { name: 'Caricature Calendar', cat: 'art', year: '2024', slug: 'caricature-calendar', img: cover('200104523'),
+    { name: 'Caricature Calendar', cat: 'fine', year: '2024', slug: 'caricature-calendar', img: cover('200104523'),
       text: 'A calendar of caricatures, digitally painted in Photoshop and Procreate.' },
-    { name: 'Festival Social Posts', cat: 'brand', year: '2024', slug: 'social-media-post-for-festivals', img: cover('200105551'),
+    { name: 'Festival Social Posts', cat: 'design', year: '2024', slug: 'social-media-post-for-festivals', img: cover('200105551'),
       text: 'Illustrated social media posts for festivals, designed in Illustrator.' },
-    { name: 'Event Graphic Design', cat: 'brand', year: '2024', slug: 'event-graphic-design', img: cover('200114995'),
+    { name: 'Event Graphic Design', cat: 'design', year: '2024', slug: 'event-graphic-design', img: cover('200114995'),
       text: 'Event branding and graphics, designed in Illustrator.' },
-    { name: 'Marketing Poster & Standee', cat: 'brand', year: '2024', slug: 'marketing-poster-standee', img: cover('200115135'),
+    { name: 'Marketing Poster & Standee', cat: 'design', year: '2024', slug: 'marketing-poster-standee', img: cover('200115135'),
       text: 'Advertising posters and standees for an English-language course, designed in Illustrator.' },
-    { name: 'Imperial English Flashcards', cat: 'product', year: '2024', slug: 'flashcards-for-imperial-english-uk', img: cover('197288719'),
+    { name: 'Imperial English Flashcards', cat: 'design', year: '2024', slug: 'flashcards-for-imperial-english-uk', img: cover('197288719'),
       text: 'Alphabet flashcards and packaging for Imperial English UK.' },
-    { name: 'Digital Recreation', cat: 'art', year: '2024', slug: 'digital-recreation', img: cover('198450509'),
+    { name: 'Digital Recreation', cat: 'fine', year: '2024', slug: 'digital-recreation', img: cover('198450509'),
       text: 'Digital restoration of an old photograph, painted in Photoshop.' },
-    { name: 'Testimonial Video', cat: 'brand', year: '2024', slug: 'testimonial-video', img: cover('200063135'),
+    { name: 'Testimonial Video', cat: 'design', year: '2024', slug: 'testimonial-video', img: cover('200063135'),
       text: 'A testimonial video with motion graphics, made in After Effects.' },
-    { name: 'App Demo Video', cat: 'product', year: '2024', slug: 'app-demo-video', img: cover('200063959'),
+    { name: 'App Demo Video', cat: 'design', year: '2024', slug: 'app-demo-video', img: cover('200063959'),
       text: 'An app demo video with motion graphics, made in After Effects.' },
-    { name: 'Instagram Story Video', cat: 'brand', year: '2024', slug: 'instagram-story-video', img: cover('200114637'),
+    { name: 'Instagram Story Video', cat: 'design', year: '2024', slug: 'instagram-story-video', img: cover('200114637'),
       text: 'Instagram story video ads with motion graphics, made in After Effects.' },
-    { name: 'Reel Ads', cat: 'brand', year: '2024', slug: 'reel-ads', img: cover('200114847'),
+    { name: 'Reel Ads', cat: 'design', year: '2024', slug: 'reel-ads', img: cover('200114847'),
       text: 'Short reel ads with motion graphics, made in After Effects.' }
   ];
 
@@ -174,7 +176,7 @@
     '.wi-side{display:flex;flex-direction:column}' +
     '.wi-side p{margin:0;padding:32px 28px;font-family:FunnelDisplay,sans-serif;font-size:15px;line-height:1.65;color:#374151;flex:1}' +
     '.wi-side .wi-link{padding:24px 28px;border-top:1px solid var(--line)}' +
-    '.wi-cols{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:auto auto 1fr}' +
+    '.wi-cols{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:auto auto 1fr}' +
     '.wi-col{display:grid;grid-template-rows:subgrid;grid-row:span 3;border-right:1px solid var(--line);min-width:0}' +
     '.wi-col:last-child{border-right:0}' +
     '.wi-n{padding:24px 28px 0;font-family:FunnelDisplay,sans-serif;font-size:14px;color:#bdbdbd}' +
@@ -184,6 +186,9 @@
     '.wi-rows{display:flex;flex-direction:column}' +
     '.wi-row{position:relative;display:block;padding:15px 28px;border-bottom:1px solid var(--line);font-family:FunnelDisplay,sans-serif;font-size:14px;line-height:1.35;color:#111827;text-decoration:none;overflow:hidden}' +
     '.wi-row:last-child{border-bottom:0}' +
+    '.wi-go{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:22px 28px}' +
+    '.wi-go svg{position:relative;z-index:1;flex:none;transition:color .3s}' +
+    '@media (hover:hover){.wi-go:hover svg{color:#fff}}' +
     '.wi-row span{position:relative;z-index:1;display:inline-block;max-width:100%;transition:color .3s}' +
     '.wi-row:after{content:"";position:absolute;left:0;right:0;bottom:0;height:0;background:#111827;transition:height .3s cubic-bezier(.7,0,.2,1)}' +
     '@media (hover:hover){.wi-row:hover span{color:#fff}.wi-row:hover:after{height:100%}}' +
@@ -223,7 +228,7 @@
   var playBtn, userPaused = reduced, hovering = false, inView = false, holdUntil = 0, elapsed = 0, lastTick = 0, wrapping = false, gliding = false, glideTimer = 0;
 
   function markup() {
-    var filters = FILTERS.map(function (f) {
+    var filters = FILTERS.filter(function (f) { return !f.overviewOnly; }).map(function (f) {
       return '<button type="button" class="wc-f" data-filter="' + f.id + '" aria-pressed="' + (f.id === current ? 'true' : 'false') + '">' + esc(f.name) + '</button>';
     }).join('');
     var slides = PROJECTS.map(function (p, i) {
@@ -461,11 +466,9 @@
   }
   function overviewHTML() {
     var cols = FILTERS.filter(function (f) { return f.id !== 'all'; }).map(function (f, n) {
-      var rows = (f.extra || []).map(function (x) { return { name: x.name, href: x.href }; })
-        .concat(PROJECTS.filter(function (p) { return p.cat === f.id; }).map(function (p) { return { name: p.name, href: '/works/' + p.slug }; }));
       return '<div class="wi-col"><span class="wi-n">' + pad(n + 1) + '</span>' +
         '<div class="wi-tx"><h3>' + esc(f.name) + '</h3><p>' + esc(f.intro) + '</p></div>' +
-        '<div class="wi-rows">' + rows.map(function (r) { return '<a class="wi-row" href="' + esc(r.href) + '"><span>' + esc(r.name) + '</span></a>'; }).join('') + '</div></div>';
+        '<div class="wi-rows"><a class="wi-row wi-go" href="' + esc(f.href) + '"><span>Explore ' + esc(f.name) + '</span>' + ARROW + '</a></div></div>';
     }).join('');
     return '<div class="wi-in"><div class="wi-frame">' +
       '<div class="wi-top">' + linkHTML(INTRO.allWork) + '</div>' +
