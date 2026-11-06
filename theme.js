@@ -21,7 +21,7 @@
     'html.theme-anim img,html.theme-anim iframe{transition:filter .45s ease}' +
     /* ---- controls ---- */
     '.tm-btn{position:fixed;right:20px;bottom:20px;z-index:10010;width:44px;height:44px;border-radius:50%;border:1px solid #e5e7eb;background:#fff;color:#111827;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.12);transition:transform .25s cubic-bezier(.2,.7,.2,1),box-shadow .25s,border-color .25s;padding:0}' +
-    '.tm-btn:hover{transform:translateY(-2px) rotate(12deg);box-shadow:0 10px 26px rgba(0,0,0,.16);border-color:#9ca3af}' +
+    '.tm-btn:hover{transform:translateY(-2px) rotate(12deg);box-shadow:0 10px 26px rgba(0,0,0,.16);background:#111827;color:#fff;border-color:#111827}' +
     '.tm-btn:focus-visible,.tm-switch:focus-visible{outline:2px solid #3b82f6;outline-offset:3px}' +
     '.tm-btn svg{width:20px;height:20px;display:block}' +
     '.tm-btn .sun{display:none}html[data-theme="dark"] .tm-btn .sun{display:block}html[data-theme="dark"] .tm-btn .moon{display:none}' +

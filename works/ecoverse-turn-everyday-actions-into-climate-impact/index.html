@@ -38,13 +38,16 @@
 .cs-text{padding:32px 40px;font-family:FunnelDisplay,sans-serif;font-size:14px;line-height:1.7;color:var(--muted);white-space:pre-line}
 .cs-team{display:flex;flex-wrap:wrap;gap:8px;padding:0 40px 32px}
 .cs-chip{font-family:FunnelDisplay,sans-serif;font-size:12px;color:#374151;border:1px solid var(--line);padding:6px 12px;background:#fafafa}
+a.cs-chip{transition:background .2s,border-color .2s,color .2s}a.cs-chip:hover{background:#111827;border-color:#111827;color:#fff}
+.cv-btn{display:inline-flex;align-items:center;gap:8px;background:#fff;color:#111827;border:1px solid #111827;padding:10px 18px;font-family:FunnelDisplay,sans-serif;font-size:12px;letter-spacing:.04em;text-decoration:none;transition:background .2s,color .2s}
+.cv-btn:hover{background:#111827;color:#fff}.cv-btn:focus-visible{outline:2px solid #3b82f6;outline-offset:3px}
 .cs-btn{display:inline-flex;align-items:center;gap:8px;border:1px solid #111827;padding:8px 16px;font-family:FunnelDisplay,sans-serif;font-size:12px;color:#111827;text-decoration:none;transition:background .2s,color .2s}
 .cs-btn:hover{background:#111827;color:#fff}
 .cs-cta{display:grid;grid-template-columns:1fr auto;gap:40px;padding:56px 40px;border:1px solid var(--line);border-top:0;max-width:64rem;margin:0 auto;position:relative;background:#fff}
 .cs-cta h2{font-family:HBSerif,serif;font-weight:300;font-size:36px;line-height:1.2;margin:16px 0 12px;color:#000}
 .cs-links{display:flex;flex-direction:column;gap:12px;min-width:205px}
-.cs-links a{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--line);padding:12px 18px;font-family:FunnelDisplay,sans-serif;font-size:12px;color:#111827;text-decoration:none;transition:border-color .2s,transform .2s}
-.cs-links a:hover{border-color:#111827;transform:translateX(2px)}
+.cs-links a{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--line);padding:12px 18px;font-family:FunnelDisplay,sans-serif;font-size:12px;color:#111827;text-decoration:none;transition:background .2s,border-color .2s,color .2s,transform .2s}
+.cs-links a:hover{background:#111827;border-color:#111827;color:#fff;transform:translateX(2px)}
 .cs-more{max-width:64rem;margin:56px auto 0}
 .cs-more h2{text-align:center;font-family:HBSerif,serif;font-weight:400;font-size:30px;margin:0 0 24px}
 .cs-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
@@ -114,7 +117,7 @@ html[data-theme="dark"] .ph-lb button:hover{background:#000;color:#fff}
 .lk .ico{flex:0 0 auto;color:#6b7280;transition:color .25s,transform .35s cubic-bezier(.2,.7,.2,1)}
 .lk small{font-family:FunnelDisplay,sans-serif;font-size:10px;letter-spacing:.04em;color:#9ca3af;white-space:nowrap}
 .cs-links a.lk:hover .ico{color:var(--brand);transform:scale(1.12)}
-.lk-go{color:#9ca3af;transition:color .25s}.cs-links a.lk:hover .lk-go{color:#111827}
+.lk-go{color:#9ca3af;transition:color .25s}.cs-links a.lk:hover .lk-go{color:#fff}
 .about-photo{position:relative;margin:0 0 28px;max-width:300px;aspect-ratio:4/5;overflow:hidden;border:1px solid var(--line);background:#f3f4f6}
 .about-photo img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 20%;filter:grayscale(.25) contrast(1.02);transition:filter .6s,transform .9s cubic-bezier(.2,.7,.2,1)}
 .about-photo:hover img{filter:none;transform:scale(1.03)}

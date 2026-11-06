@@ -110,7 +110,7 @@
     '.wc-filters{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:0 0 26px}' +
     '.wc-f{appearance:none;margin:0;background:#fff;border:1px solid var(--line);padding:9px 14px;font-family:FunnelDisplay,sans-serif;font-size:11px;line-height:1;letter-spacing:.1em;text-transform:uppercase;color:#374151;cursor:pointer;white-space:nowrap;transition:background-color .2s,border-color .2s,color .2s}' +
     '.wc-f[aria-pressed="true"]{background:#111827;border-color:#111827;color:#fff}' +
-    '@media (hover:hover){.wc-f:not([aria-pressed="true"]):hover{border-color:#111827;color:#111827}}' +
+    '@media (hover:hover){.wc-f:not([aria-pressed="true"]):hover{background:#111827;border-color:#111827;color:#fff}}' +
     /* track: runs the full page width so the neighbouring cards show at the sides */
     '.wc-track{position:relative;display:flex;gap:28px;width:100vw;margin-left:calc(50% - 50vw);box-sizing:border-box;padding:10px calc((100vw - var(--card))/2);overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;outline:0;cursor:grab}' +
     '.wc-track::-webkit-scrollbar{display:none}' +

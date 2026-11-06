@@ -105,7 +105,7 @@
     '.hn-pitch h3{margin:0;font-family:HBSerif,serif;font-weight:300;font-size:28px;line-height:1.14;color:#111827}' +
     '.hn-btn{all:unset;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:8px;height:42px;padding:0 18px;cursor:pointer;font-family:FunnelDisplay,sans-serif;font-size:13px;border:1px solid #111827;color:#111827;transition:background-color .2s,color .2s,opacity .2s}' +
     '@media (hover:hover){.hn-btn:hover{background:#111827;color:#fff}}' +
-    '.hn-btn.solid{background:#111827;color:#fff}@media (hover:hover){.hn-btn.solid:hover{background:#f97316;border-color:#f97316}}' +
+    '.hn-btn.solid{background:#fff;color:#111827}@media (hover:hover){.hn-btn.solid:hover{background:#111827;color:#fff}}' +
     '.hn-pitch .hn-btn{margin-top:auto;width:100%}' +
     '.hn-face ul{list-style:none;margin:0;padding:0}' +
     '.hn-svc{display:flex;align-items:center;gap:8px;padding:3px 0;font-family:FunnelDisplay,sans-serif;font-size:13px;line-height:1.3;color:#374151;text-decoration:none;transition:color .2s,transform .3s var(--ease)}' +
@@ -131,7 +131,7 @@
     'textarea.hn-field{min-height:92px;resize:vertical;line-height:1.5}' +
     '.hn-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-bottom:8px}' +
     '.hn-chip{all:unset;box-sizing:border-box;padding:7px 11px;border:1px solid var(--line);background:#fafafa;cursor:pointer;font-family:FunnelDisplay,sans-serif;font-size:12px;color:#374151;transition:background-color .2s,color .2s,border-color .2s}' +
-    '@media (hover:hover){.hn-chip:hover{border-color:#111827}}.hn-chip[aria-pressed="true"]{background:#111827;border-color:#111827;color:#fff}' +
+    '@media (hover:hover){.hn-chip:not([aria-pressed="true"]):hover{background:#111827;border-color:#111827;color:#fff}}.hn-chip[aria-pressed="true"]{background:#111827;border-color:#111827;color:#fff}' +
     '.hn-actions{display:grid;grid-template-columns:1fr 1.4fr;gap:8px;margin-top:4px}' +
     '.hn-note{margin:10px 0 0;font-family:FunnelDisplay,sans-serif;font-size:12px;line-height:1.5;color:#6b7280}.hn-note a{color:#111827}' +
     '.hn-err{min-height:0;margin:0 0 8px;font-family:FunnelDisplay,sans-serif;font-size:11px;color:#dc2626}.hn-err:empty{display:none}' +
