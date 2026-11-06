@@ -29,18 +29,20 @@
     '.ww-cap{margin:-8px 0 26px;text-align:center;font-family:FunnelDisplay,sans-serif;font-size:12px;color:#9ca3af}' +
     '.ww-box{position:relative;border:1px solid #e5e7eb;overflow:hidden;background:#fff}' +
     '.ww-plus{position:absolute;z-index:5;font-family:monospace;font-size:13px;line-height:1;color:#9ca3af;pointer-events:none;user-select:none}' +
-    '.ww-mask{-webkit-mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent);mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent)}' +
-    '.ww-track{display:flex;width:max-content;animation:wwScroll 48s linear infinite;will-change:transform}' +
-    '.ww-box:hover .ww-track{animation-play-state:paused}' +
+    '.ww-mask{overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;scrollbar-width:none;-ms-overflow-style:none;cursor:grab;-webkit-mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent);mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent)}' +
+    '.ww-mask::-webkit-scrollbar{display:none}' +
+    '.ww-mask.is-drag{cursor:grabbing;user-select:none;-webkit-user-select:none}' +
+    '.ww-mask:focus-visible{outline:2px solid #3b82f6;outline-offset:-2px}' +
+    '.ww-track{display:flex;width:max-content}' +
     '.ww-item{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;width:240px;height:156px;border-right:1px solid #f0f1f3;text-decoration:none;color:inherit}' +
-    '.ww-item img{display:block;height:72px;width:auto;object-fit:contain;mix-blend-mode:multiply;filter:grayscale(1);opacity:.62;transition:filter .45s,opacity .45s,transform .45s cubic-bezier(.2,.7,.2,1)}' +
-    '.ww-item .mark{height:84px;display:flex;align-items:center;justify-content:center;max-width:190px;text-align:center;font-family:HBSerif,serif;font-size:28px;line-height:1.1;color:#9ca3af;transition:color .45s,transform .45s cubic-bezier(.2,.7,.2,1)}' +
-    '.ww-item small{font-family:FunnelDisplay,sans-serif;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#9ca3af;transition:color .45s;text-align:center;padding:0 10px}' +
-    '.ww-item:hover img{filter:none;opacity:1;transform:scale(1.08)}' +
+    '.ww-item img{display:block;height:72px;width:auto;object-fit:contain;mix-blend-mode:multiply;-webkit-user-drag:none;user-select:none;-webkit-user-select:none;transition:transform .45s cubic-bezier(.2,.7,.2,1)}' +
+    '.ww-item .mark{height:84px;display:flex;align-items:center;justify-content:center;max-width:190px;text-align:center;font-family:HBSerif,serif;font-size:28px;line-height:1.1;color:#374151;transition:color .45s,transform .45s cubic-bezier(.2,.7,.2,1)}' +
+    '.ww-item small{font-family:FunnelDisplay,sans-serif;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#6b7280;transition:color .45s;text-align:center;padding:0 10px}' +
+    '.ww-item:hover img{transform:scale(1.08)}' +
     '.ww-item:hover .mark{color:#111827;transform:scale(1.06)}' +
     '.ww-item:hover small{color:#111827}' +
-    '@keyframes wwScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}' +
-    '@media (prefers-reduced-motion:reduce){.ww-track{animation:none}.ww-box{overflow-x:auto}.ww-mask{-webkit-mask-image:none;mask-image:none}}' +
+    /* dark mode inverts the whole page, so each logo is turned back and sits on a small white tile to keep its true colours */
+    '[data-theme="dark"] .ww-item img{mix-blend-mode:normal;background:#fff;box-shadow:0 0 0 6px #fff;border-radius:3px;filter:invert(1) hue-rotate(180deg);opacity:1}' +
     '@media (max-width:767px){.ww{margin-top:72px}.ww-item{width:176px;height:122px}.ww-item .mark{height:64px;max-width:150px;font-size:21px}}';
 
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
@@ -73,7 +75,7 @@
 
   function cell(c) {
     var top = c.logo
-      ? '<img' + (c.xwide ? ' class="xwide"' : c.wide ? ' class="wide"' : '') + ' src="' + esc(c.logo) + '" alt="' + esc(c.name) + ' logo" loading="eager" decoding="async">'
+      ? '<img' + (c.xwide ? ' class="xwide"' : c.wide ? ' class="wide"' : '') + ' src="' + esc(c.logo) + '" alt="' + esc(c.name) + ' logo" loading="eager" decoding="async" draggable="false">'
       : '<span class="mark">' + esc(c.name) + '</span>';
     return '<div class="ww-item" title="' + esc(c.name) + '">' + top + '<small>' + esc(c.short || c.name) + '</small></div>';
   }
@@ -98,9 +100,58 @@
       '<div class="ww-box">' +
       '<span class="ww-plus" style="left:0;top:0;transform:translate(-50%,-50%)">+</span><span class="ww-plus" style="right:0;top:0;transform:translate(50%,-50%)">+</span>' +
       '<span class="ww-plus" style="left:0;bottom:0;transform:translate(-50%,50%)">+</span><span class="ww-plus" style="right:0;bottom:0;transform:translate(50%,50%)">+</span>' +
-      '<div class="ww-mask"><div class="ww-track">' + cells + cells + '</div></div></div>';
+      '<div class="ww-mask" tabindex="0" role="region" aria-label="Organizations, scroll sideways"><div class="ww-track">' + cells + cells + cells + '</div></div></div>';
     fitAll(sec);
     return sec;
+  }
+
+  /* The strip is a scrollable box, so phones and tablets get their own swiping and momentum, and the mouse can drag it.
+     It holds three copies of the list and starts in the middle one; whenever it leaves the middle copy it jumps by
+     one copy's width, which looks identical, so it never runs out. It drifts by itself until someone touches it, hovers
+     it or drags it, then carries on after a pause. SPEED is pixels a second; set it to 0 to stop the drifting. */
+  var SPEED = 36;
+  function setupScroll(sec) {
+    var mask = sec.querySelector('.ww-mask'), track = sec.querySelector('.ww-track'), box = sec.querySelector('.ww-box');
+    var calm = window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
+    var W = 0, pos = 0, lastSet = -99, last = 0, busyUntil = 0, hover = false, inView = true, dragging = false, startX = 0, startScroll = 0;
+    function copy() { W = track.scrollWidth / 3; return W; }
+    function wrap() {
+      if (!copy()) return;
+      var v = mask.scrollLeft;
+      if (v >= 2 * W) { v -= W; startScroll -= W; } else if (v < W) { v += W; startScroll += W; } else return;
+      mask.scrollLeft = v; pos = v; lastSet = v;
+    }
+    mask.addEventListener('scroll', function () {
+      if (Math.abs(mask.scrollLeft - lastSet) > 2) { busyUntil = performance.now() + 1800; pos = mask.scrollLeft; }
+      wrap();
+    }, { passive: true });
+    /* mouse: drag. Touch and pen already scroll the box natively */
+    mask.addEventListener('pointerdown', function (e) {
+      if (e.pointerType !== 'mouse' || e.button !== 0) return;
+      dragging = true; startX = e.clientX; startScroll = mask.scrollLeft;
+      mask.classList.add('is-drag');
+      try { mask.setPointerCapture(e.pointerId); } catch (err) {}
+    });
+    mask.addEventListener('pointermove', function (e) { if (dragging) mask.scrollLeft = startScroll - (e.clientX - startX); });
+    function release() { if (!dragging) return; dragging = false; mask.classList.remove('is-drag'); busyUntil = performance.now() + 1500; }
+    mask.addEventListener('pointerup', release);
+    mask.addEventListener('pointercancel', release);
+    mask.addEventListener('lostpointercapture', release);
+    box.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') hover = true; });
+    box.addEventListener('pointerleave', function () { hover = false; });
+    if (window.IntersectionObserver) new IntersectionObserver(function (en) { inView = en[0].isIntersecting; }).observe(sec);
+    function frame(t) {
+      requestAnimationFrame(frame);
+      var dt = last ? Math.min(0.05, (t - last) / 1000) : 0;
+      last = t;
+      if (calm || !SPEED || dragging || hover || !inView || document.hidden || t < busyUntil) { pos = mask.scrollLeft; return; }
+      if (!copy()) return;
+      pos += SPEED * dt;
+      lastSet = pos;
+      mask.scrollLeft = pos;
+    }
+    /* start in the middle copy once the strip has a width */
+    requestAnimationFrame(function () { if (copy()) { mask.scrollLeft = W; pos = W; lastSet = W; } requestAnimationFrame(frame); });
   }
 
   function place() {
@@ -110,7 +161,9 @@
     if (!document.getElementById('ww-style')) {
       var st = document.createElement('style'); st.id = 'ww-style'; st.textContent = CSS; document.head.appendChild(st);
     }
-    target.parentNode.insertBefore(build(), target);
+    var sec = build();
+    target.parentNode.insertBefore(sec, target);
+    setupScroll(sec);
     return true;
   }
 

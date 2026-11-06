@@ -12,9 +12,16 @@
   if (window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches) return;
 
   var TIME = { start: 80, hold: 800, scrambleIn: 420, scrambleOut: 200, open: 750, close: 720, maxWait: 1600, safety: 6000 };
-  /* phones: a shorter version, because it plays on every page and slower connections add their own wait */
-  if (window.matchMedia && matchMedia('(max-width:767px)').matches) {
-    TIME.hold = 450; TIME.scrambleIn = 320; TIME.scrambleOut = 160; TIME.open = 600; TIME.close = 520; TIME.maxWait = 1200;
+  /* Phones and tablets get a simpler loader: a black screen, the page name, then a fade. The full version animates
+     a masked circle and gradient layers through registered custom properties, which phone browsers (all iOS
+     browsers, Chrome included, use Apple's WebKit) draw slowly or not at all. It is also shorter, because it
+     plays on every page and slower connections add their own wait. */
+  var ua = navigator.userAgent || '';
+  var simple = /iP(hone|ad|od)|Android|Mobile/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ||
+    (window.matchMedia && matchMedia('(max-width:767px)').matches);
+  if (simple) {
+    root.setAttribute('data-hb-simple', '');
+    TIME.hold = 350; TIME.scrambleIn = 260; TIME.scrambleOut = 120; TIME.open = 380; TIME.close = 240; TIME.maxWait = 1000;
   }
 
   function lineLayer(x, y, w, h, alpha) {
@@ -64,6 +71,11 @@
     /* page content waits for the circle to open */
     'html[data-hb-wait] .cs-reveal.in{opacity:0;transform:translateY(28px)}' +
     'html[data-hb-wait] .cs-fade{animation-play-state:paused}' +
+    /* phones and tablets: no mask, no gradients, no registered properties. Just a solid screen and its name, which fade */
+    'html[data-hb][data-hb-simple]::before{-webkit-mask:none;mask:none;opacity:1;transition:opacity ' + TIME.close + 'ms ease}' +
+    'html[data-hb="start"][data-hb-simple]::before{opacity:0;transition:none}' +
+    'html[data-hb="open"][data-hb-simple]::before{opacity:0;transition:opacity ' + TIME.open + 'ms ease}' +
+    'html[data-hb][data-hb-simple]::after{background:none;padding-left:0;transition:opacity .2s ease}' +
     /* the white loader this replaces */
     '.fixed.inset-0.bg-white{display:none!important}';
 
