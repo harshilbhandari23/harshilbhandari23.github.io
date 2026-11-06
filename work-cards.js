@@ -151,7 +151,7 @@
     '@media (max-width:767px){' +
       '.wc{--card:calc(100vw - 48px)}' +
       '.wc-track{gap:14px}' +
-      '.wc-filters{justify-content:flex-start;gap:6px;margin-bottom:18px}' +
+      '.wc-filters{justify-content:center;gap:6px;margin-bottom:18px}' +
       '.wc-f{padding:9px 11px}' +
       '.wc-card{grid-template-columns:minmax(0,1fr)}' +
       '.wc-pic{order:1}.wc-text{order:2;padding:24px}' +

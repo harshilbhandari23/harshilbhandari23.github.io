@@ -183,6 +183,85 @@ function start() {
   }
   function box(x, y, z, w, h, d, rx = 0, ry = 0, rz = 0) { solid(new BoxGeometry(w, h, d), x, y, z, rx, ry, rz); }
 
+  /* ---------- lettering and icons, drawn as thin lines laid onto a surface ----------
+     A stroke is a list of [u, v] points. For letters v runs from 0 to 1, the height of a capital. `ink` places
+     strokes on a surface (`engrave`): O is a point on it, R the direction the text reads, U the direction up the text, and
+     s a size in mm. Every mark sits a fraction of a millimetre above its surface, so it is never buried. */
+  const TAU = Math.PI * 2;
+  const arc = (cx, cy, rx, ry, a0, a1, n = 18) => {
+    const pts = [];
+    for (let i = 0; i <= n; i++) { const t = a0 + (a1 - a0) * i / n; pts.push([cx + Math.cos(t) * rx, cy + Math.sin(t) * ry]); }
+    return pts;
+  };
+  const GLYPH = {
+    A: [[[0, 0], [0.3, 1], [0.6, 0]], [[0.12, 0.35], [0.48, 0.35]]],
+    D: [[[0, 0], [0, 1], [0.3, 1], [0.5, 0.85], [0.6, 0.5], [0.5, 0.15], [0.3, 0], [0, 0]]],
+    E: [[[0.55, 1], [0, 1], [0, 0], [0.55, 0]], [[0, 0.5], [0.4, 0.5]]],
+    F: [[[0.55, 1], [0, 1], [0, 0]], [[0, 0.5], [0.4, 0.5]]],
+    I: [[[0.15, 0], [0.15, 1]]],
+    J: [[[0.15, 0], [0.15, 1]], [[0, 1], [0.3, 1]], [[0, 0], [0.3, 0]]],   /* an I with serifs, for the Roman numerals */
+    K: [[[0, 0], [0, 1]], [[0.55, 1], [0, 0.4]], [[0.15, 0.55], [0.55, 0]]],
+    M: [[[0, 0], [0, 1], [0.3, 0.4], [0.6, 1], [0.6, 0]]],
+    N: [[[0, 0], [0, 1], [0.6, 0], [0.6, 1]]],
+    O: [arc(0.3, 0.5, 0.3, 0.5, 0, TAU, 20)],
+    P: [[[0, 0], [0, 1], [0.35, 1], [0.55, 0.9], [0.6, 0.72], [0.55, 0.55], [0.35, 0.45], [0, 0.45]]],
+    S: [[[0.58, 0.85], [0.45, 0.98], [0.2, 1], [0.03, 0.88], [0.03, 0.68], [0.2, 0.52], [0.4, 0.45], [0.58, 0.32], [0.58, 0.12], [0.4, 0], [0.15, 0.02], [0.02, 0.15]]],
+    U: [[[0, 1], [0, 0.25], [0.12, 0.04], [0.3, 0], [0.48, 0.04], [0.6, 0.25], [0.6, 1]]],
+    Z: [[[0, 1], [0.6, 1], [0, 0], [0.6, 0]]],
+    n: [[[0, 0], [0, 0.6]], [[0, 0.45], [0.15, 0.58], [0.3, 0.6], [0.45, 0.5], [0.45, 0]]],
+    i: [[[0.1, 0], [0.1, 0.58]], arc(0.1, 0.82, 0.035, 0.035, 0, TAU, 6)],
+    1: [[[0.05, 0.8], [0.25, 1], [0.25, 0]], [[0.05, 0], [0.45, 0]]],
+    2: [[[0.02, 0.8], [0.12, 0.95], [0.3, 1], [0.48, 0.95], [0.58, 0.78], [0.5, 0.58], [0, 0], [0.6, 0]]],
+    3: [[[0.02, 0.9], [0.2, 1], [0.45, 1], [0.58, 0.85], [0.45, 0.58], [0.25, 0.52], [0.45, 0.48], [0.6, 0.3], [0.5, 0.08], [0.3, 0], [0.08, 0.05], [0, 0.15]]],
+    6: [[[0.5, 0.95], [0.3, 1], [0.1, 0.9], [0.02, 0.6], [0.02, 0.3], [0.1, 0.08], [0.3, 0], [0.5, 0.08], [0.58, 0.28], [0.5, 0.48], [0.3, 0.55], [0.1, 0.48], [0.02, 0.35]]],
+    '-': [[[0.05, 0.5], [0.45, 0.5]]]
+  };
+  const NARROW = { I: 0.3, J: 0.3, i: 0.2, 1: 0.5, '-': 0.5, n: 0.45 };
+  const advance = (c) => (NARROW[c] === undefined ? 0.6 : NARROW[c]) + 0.2;
+  function engrave(strokes, O, R, U, s) {
+    const at = (p) => [O[0] + (R[0] * p[0] + U[0] * p[1]) * s, O[1] + (R[1] * p[0] + U[1] * p[1]) * s, O[2] + (R[2] * p[0] + U[2] * p[1]) * s];
+    strokes.forEach((st) => { for (let i = 0; i < st.length - 1; i++) seg(at(st[i]), at(st[i + 1])); });
+  }
+  /* a line of text centred on O, capitals h mm tall */
+  function word(str, O, R, U, h) {
+    let w = -0.2;
+    for (const c of str) w += advance(c);
+    let x = -w / 2;
+    for (const c of str) {
+      if (GLYPH[c]) engrave(GLYPH[c], [O[0] + (R[0] * x - U[0] * 0.5) * h, O[1] + (R[1] * x - U[1] * 0.5) * h, O[2] + (R[2] * x - U[2] * 0.5) * h], R, U, h);
+      x += advance(c);
+    }
+  }
+  /* icons, each inside a box from -1 to 1 */
+  const lens = [arc(-0.15, 0.2, 0.55, 0.55, 0, TAU, 20), [[0.24, -0.2], [0.8, -0.8]]];
+  const ICON = {
+    trash: [[[-0.65, 0.45], [0.65, 0.45]], [[-0.22, 0.45], [-0.22, 0.7], [0.22, 0.7], [0.22, 0.45]], [[-0.5, 0.4], [-0.38, -0.7], [0.38, -0.7], [0.5, 0.4]], [[-0.15, 0.25], [-0.15, -0.5]], [[0.15, 0.25], [0.15, -0.5]]],
+    frames: [[[-0.7, -0.5], [-0.7, 0.45], [0.25, 0.45], [0.25, -0.5], [-0.7, -0.5]], [[-0.3, 0.45], [-0.3, 0.8], [0.65, 0.8], [0.65, -0.15], [0.25, -0.15]]],
+    play: [[[-0.85, -0.55], [-0.85, 0.55], [0.85, 0.55], [0.85, -0.55], [-0.85, -0.55]], [[-0.25, -0.3], [0.35, 0], [-0.25, 0.3], [-0.25, -0.3]]],
+    zoomIn: lens.concat([[[-0.4, 0.2], [0.1, 0.2]], [[-0.15, -0.05], [-0.15, 0.45]]]),
+    zoomOut: lens.concat([[[-0.4, 0.2], [0.1, 0.2]]]),
+    key: [arc(-0.5, 0, 0.3, 0.3, 0, TAU, 14), [[-0.2, 0], [0.85, 0]], [[0.4, 0], [0.4, -0.35]], [[0.7, 0], [0.7, -0.35]]],
+    camera: [[[-0.85, -0.5], [-0.85, 0.4], [-0.35, 0.4], [-0.2, 0.7], [0.2, 0.7], [0.35, 0.4], [0.85, 0.4], [0.85, -0.5], [-0.85, -0.5]], arc(0, -0.05, 0.3, 0.3, 0, TAU, 12)],
+    video: [[[-0.85, -0.5], [-0.85, 0.5], [0.3, 0.5], [0.3, -0.5], [-0.85, -0.5]], [[0.3, 0.12], [0.85, 0.5], [0.85, -0.5], [0.3, -0.12]]],
+    record: [arc(0, 0, 0.9, 0.9, 0, TAU, 20), arc(0, 0, 0.45, 0.45, 0, TAU, 14)],
+    expo: [[[-0.85, -0.85], [-0.85, 0.85], [0.85, 0.85], [0.85, -0.85], [-0.85, -0.85]], [[-0.55, -0.55], [0.55, 0.55]], [[-0.62, 0.3], [-0.28, 0.3]], [[-0.45, 0.13], [-0.45, 0.47]], [[0.28, -0.3], [0.62, -0.3]]]
+  };
+  /* the Nikon wordmark: bold outlined letters, stretched wide and leaning slightly, as on the real camera */
+  function nikonMark(O, R, U, h) {
+    const letters = [
+      [0, [[0, 0], [0.18, 0], [0.18, 0.6], [0.6, 0], [0.8, 0], [0.8, 1], [0.62, 1], [0.62, 0.4], [0.2, 1], [0, 1], [0, 0]]],
+      [0.9, [[0, 0], [0.17, 0], [0.17, 0.7], [0, 0.7], [0, 0]]],
+      [0.9, [[0, 0.82], [0.17, 0.82], [0.17, 1], [0, 1], [0, 0.82]]],
+      [1.17, [[0, 0], [0.17, 0], [0.17, 1], [0, 1], [0, 0]]],
+      [1.17, [[0.17, 0.3], [0.5, 0.7], [0.74, 0.7], [0.4, 0.32], [0.78, 0], [0.54, 0], [0.17, 0.24], [0.17, 0.3]]],
+      [2.05, arc(0.38, 0.35, 0.38, 0.37, 0, TAU, 24)],
+      [2.05, arc(0.38, 0.35, 0.2, 0.2, 0, TAU, 16)],
+      [2.91, [[0, 0], [0.17, 0], [0.17, 0.4], [0.2, 0.5], [0.28, 0.56], [0.38, 0.58], [0.48, 0.54], [0.52, 0.44], [0.52, 0], [0.69, 0], [0.69, 0.46], [0.64, 0.6], [0.54, 0.69], [0.4, 0.72], [0.27, 0.69], [0.17, 0.62], [0.17, 0.7], [0, 0.7], [0, 0]]]
+    ];
+    const SX = 1.45, LEAN = 0.2, W = 3.6 * SX + LEAN;
+    letters.forEach(([x0, pts]) => engrave([pts.map(([x, y]) => [(x0 + x) * SX + LEAN * y - W / 2, y - 0.5])], O, R, U, h));
+  }
+
   /* ---------- where things are ---------- */
   /* from the front photo and the back photo (pixels) to model millimetres */
   const fx = (u) => (u - 405) * 0.2413, fy = (v) => -50.75 + (563 - v) * 0.255;
@@ -375,6 +454,13 @@ function start() {
   /* Z badge, moulded into the right shoulder */
   const zx = fx(632), zy = fy(316), zw = 3.2, zh = 2.4, zf = ZF + 0.03;
   poly([[zx - zw, zy + zh, zf], [zx + zw, zy + zh, zf], [zx - zw + 1.5, zy - zh + 0.8, zf], [zx + zw - 0.2, zy - zh + 0.8, zf], [zx + zw - 0.8, zy - zh, zf], [zx - zw - 0.8, zy - zh, zf], [zx + zw - 2.2, zy + zh - 0.9, zf], [zx - zw + 0.6, zy + zh - 0.9, zf]]);
+  /* the Nikon wordmark, on the sloped front of the viewfinder hump. The slope climbs 0.755 mm for every mm along it
+     and falls back 0.657 mm, so the lettering lies in that plane, a hair above the surface */
+  const SLOPE_UP = [0, 0.755, -0.657], SLOPE_OUT = [0, 0.657, 0.755];
+  nikonMark([HX + SLOPE_OUT[0] * 0.14, 38.1 + 0.755 * 4 + SLOPE_OUT[1] * 0.14, 10 - 0.657 * 4 + SLOPE_OUT[2] * 0.14], [1, 0, 0], SLOPE_UP, 4.6);
+  /* Fn1 and Fn2, printed on the body beside their keys */
+  word('Fn1', [fx(312), fy(413), ZF + 1.24], [1, 0, 0], [0, 1, 0], 1.7);
+  word('Fn2', [fx(321), fy(441), ZF + 1.24], [1, 0, 0], [0, 1, 0], 1.7);
   /* round cover on the right shoulder */
   turned(fx(634), fy(277), ZF, [[0, 0], [3.2, 0], [3.2, 0.5], [2.6, 0.7], [0, 0.7]], 'z');
   /* panel seams, where the body's covering meets the metal top and base */
@@ -399,9 +485,19 @@ function start() {
   }
   /* record, ISO and exposure buttons, in an arc behind the shutter */
   topButton(-35, 31.7, 13, 2.8);
-  circleFlat(-35, 33.12, 13, 1.5);
+  engrave(ICON.record, [-35, 33.14, 13], [-1, 0, 0], [0, 0, 1], 1.5);
   topButton(fx(180), HEAD - 0.2, 4.5, 2.6);
-  topButton(fx(205), HEAD - 0.2, 5.5, 2.6);
+  engrave(ICON.expo, [fx(180), HEAD + 1.24, 4.5], [-1, 0, 0], [0, 0, 1], 1.35);
+  topButton(-44, HEAD - 0.2, 5.8, 2.6);
+  word('ISO', [-44, HEAD + 1.24, 5.8], [-1, 0, 0], [0, 0, 1], 1.15);
+  /* OFF and ON, printed on the power-switch collar in front of the shutter. The collar tilts forward by TILT */
+  const collarU = [0, -Math.sin(TILT), Math.cos(TILT)];
+  [['OFF', 3.8], ['ON', -3.4]].forEach(([t, dx]) => {
+    const dz = 7.4;
+    word(t, [SX_ + dx, SY_ + 2.4 - Math.tan(TILT) * dz + 0.18, SZ_ + dz], [-1, 0, 0], collarU, 1.0);
+  });
+  /* the model name, on the grip's top surface behind the exposure button */
+  word('Z6III', [-50, HEAD + 0.06, -8], [-1, 0, 0], [0, 0, 1], 2.6);
   /* top display, on the deck between the hump and the grip */
   const LX0 = -34, LX1 = -11.7, LZ0 = -1, LZ1 = -23;
   box((LX0 + LX1) / 2, DECK + 0.25, (LZ0 + LZ1) / 2, LX1 - LX0 + 1.2, 0.5, LZ0 - LZ1 + 1.2);
@@ -414,11 +510,12 @@ function start() {
   const DX = fx(600), DY = DECK, DZ = -9;
   turned(DX, DY, DZ, [[0, 0], [14.2, 0], [14.2, 0.8], [13, 0.8], [13, 6.4], [12.2, 7], [6.2, 7], [6.2, 7.4], [5.6, 7.8], [0, 7.8]], 'y', false, 72);
   ridges(DX, DY + 0.8, DZ, 13, 5.6, 80, 'y');
-  /* the mode marks around the dial's top */
-  for (let i = 0; i < 12; i++) {
-    const t = i / 12 * Math.PI * 2;
-    seg([DX + Math.cos(t) * 8, DY + 7.01, DZ + Math.sin(t) * 8], [DX + Math.cos(t) * 10.8, DY + 7.01, DZ + Math.sin(t) * 10.8]);
-  }
+  /* the modes, printed around the dial's top with each label's top pointing outwards */
+  ['P', 'S', 'A', 'M', 'U1', 'U2', 'U3'].forEach((t, i) => {
+    const a = Math.PI / 2 + i * (TAU / 9), dx = Math.cos(a), dz = Math.sin(a);
+    word(t, [DX + dx * 9.3, DY + 7.04, DZ + dz * 9.3], [-dz, 0, dx], [dx, 0, dz], 1.9);
+  });
+  engrave([[[-0.7, -0.7], [-0.7, 0.7], [0.7, 0.7], [0.7, -0.7], [-0.7, -0.7]], arc(0, 0, 0.35, 0.35, 0, TAU, 10)], [DX + Math.cos(Math.PI / 2 - TAU / 9) * 9.3, DY + 7.04, DZ + Math.sin(Math.PI / 2 - TAU / 9) * 9.3], [-1, 0, 0], [0, 0, 1], 1.2);   /* the green AUTO mark */
 
   /* ---------- back: viewfinder and eyecup ---------- */
   /* the eyecup's outline, as seen from behind: narrow at the top, widest low down */
@@ -503,6 +600,23 @@ function start() {
   poly(outlinePts(thumbOutline(0), ZB - 0.03));
   poly(outlinePts(thumbOutline(-0.1), -36.03));
   slab(rrect(bx(666), by(555), bx(615), by(510), 3), -32.4, ZB, 0.5);
+
+  /* ---------- back: the icons and names printed on the buttons, as on Nikon's photo ----------
+     Seen from behind, text reads towards -x. Each mark sits just behind its button's cap. */
+  const BR = [-1, 0, 0], BU = [0, 1, 0], mark = (z) => z - 0.05;
+  engrave(ICON.frames, [bx(172), by(283), mark(ZB - 2.05)], BR, BU, 1.6);          /* release mode */
+  engrave(ICON.trash, [bx(215), by(283), mark(ZB - 2.05)], BR, BU, 1.6);           /* delete */
+  engrave(ICON.key, [bx(172), by(306), mark(ZB - 0.5)], BR, BU, 1.3);              /* protect, printed below the pair */
+  engrave(ICON.camera, [bx(444), by(266), mark(ZB)], BR, BU, 1.1);                 /* still / video, either side of DISP's lever */
+  engrave(ICON.video, [bx(444), by(298), mark(ZB)], BR, BU, 1.1);
+  word('DISP', [bx(475), by(280), mark(ZB - 3.35)], BR, BU, 1.5);
+  word('AF-ON', [bx(555), by(280), mark(ZB - 2.15)], BR, BU, 1.25);
+  word('i', [bx(550), by(380), mark(ZB - 1.85)], BR, BU, 2.8);
+  word('OK', [bx(568), by(436), mark(ZB - 2.65)], BR, BU, 1.9);
+  engrave(ICON.zoomIn, [bx(548), by(492), mark(ZB - 1.75)], BR, BU, 1.6);
+  word('MENU', [bx(590), by(492), mark(ZB - 1.75)], BR, BU, 1.05);
+  engrave(ICON.zoomOut, [bx(546), by(528), mark(ZB - 1.75)], BR, BU, 1.6);
+  engrave(ICON.play, [bx(591), by(528), mark(ZB - 1.75)], BR, BU, 1.5);
 
   /* ---------- sides ---------- */
   /* strap lugs: a post with a ring */

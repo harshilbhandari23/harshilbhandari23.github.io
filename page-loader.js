@@ -12,13 +12,11 @@
   if (window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches) return;
 
   var TIME = { start: 80, hold: 800, scrambleIn: 420, scrambleOut: 200, open: 750, close: 720, maxWait: 1600, safety: 6000 };
-  /* Phones and tablets get a simpler loader: a black screen, the page name, then a fade. The full version animates
-     a masked circle and gradient layers through registered custom properties, which phone browsers (all iOS
-     browsers, Chrome included, use Apple's WebKit) draw slowly or not at all. It is also shorter, because it
-     plays on every page and slower connections add their own wait. */
-  var ua = navigator.userAgent || '';
-  var simple = /iP(hone|ad|od)|Android|Mobile/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ||
-    (window.matchMedia && matchMedia('(max-width:767px)').matches);
+  /* Every screen gets the same loader. The one exception is a browser that cannot animate registered custom
+     properties (iOS before 16.4, mostly): it would snap the circle open instead of animating it, so it gets a plain
+     fade instead. This is decided by what the browser can do, not by what device it is. */
+  /* window.CSS, because this file has its own variable called CSS further down */
+  var simple = !(window.CSS && typeof window.CSS.registerProperty === 'function');
   if (simple) {
     root.setAttribute('data-hb-simple', '');
     TIME.hold = 350; TIME.scrambleIn = 260; TIME.scrambleOut = 120; TIME.open = 380; TIME.close = 240; TIME.maxWait = 1000;
