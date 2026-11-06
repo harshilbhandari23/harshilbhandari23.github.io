@@ -1,0 +1,39 @@
+/* Base styles for every page: fonts, a small reset and the homepage. */
+@font-face{font-family:HBSerif;src:url(/fonts/hb-serif/newsreader-latin-300-normal.woff2) format("woff2");font-weight:300;font-style:normal;font-display:swap}
+@font-face{font-family:HBSerif;src:url(/fonts/hb-serif/newsreader-latin-400-normal.woff2) format("woff2");font-weight:400 700;font-style:normal;font-display:swap}
+@font-face{font-family:HBSerif;src:url(/fonts/hb-serif/newsreader-latin-300-italic.woff2) format("woff2");font-weight:300 400;font-style:italic;font-display:swap}
+@font-face{font-family:FunnelDisplay;src:url(/fonts/FunnelDisplay/FunnelDisplay-Light.ttf) format("truetype");font-weight:300;font-style:normal;font-display:swap}
+@font-face{font-family:FunnelDisplay;src:url(/fonts/FunnelDisplay/FunnelDisplay-Regular.ttf) format("truetype");font-weight:400;font-style:normal;font-display:swap}
+*,::before,::after{box-sizing:border-box;border:0 solid #e5e7eb}
+html{-webkit-text-size-adjust:100%;tab-size:4}
+body{margin:0;background:#fff;color:#111827;font-family:FunnelDisplay,ui-sans-serif,system-ui,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4,p,dl,dd,figure,ul,ol{margin:0;padding:0}ul,ol{list-style:none}
+img,svg,video,canvas,iframe{display:block;max-width:100%}img,video{height:auto}
+a{color:inherit;text-decoration:none}button,input,textarea,select{font:inherit;color:inherit}
+button{background:none;padding:0;cursor:pointer}
+/* homepage */
+.ph-hero{padding:72px 40px 64px;text-align:center;display:flex;flex-direction:column;align-items:center}
+.ph-hero img{width:44px;height:58px;margin-bottom:28px}
+.ph-name{font-family:HBSerif,serif;font-weight:300;font-size:clamp(46px,9vw,104px);line-height:1;letter-spacing:-.03em;color:#000}
+.ph-name i{font-style:italic;font-size:1.25em;margin-right:.02em}
+.ph-role{margin-top:18px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#9ca3af}
+.ph-intro{max-width:34rem;margin-top:22px;font-size:15px;line-height:1.7;color:#6b7280}
+.ph-copy{display:inline-flex;align-items:center;gap:14px;margin-top:30px;border:1px solid #e5e7eb;background:#fff;padding:9px 10px 9px 18px;font-size:12px;color:#374151;cursor:pointer;transition:border-color .2s}
+.ph-copy:hover{border-color:#111827}.ph-copy b{font-weight:400;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#9ca3af;min-width:44px;text-align:right}
+.pw-head{margin:72px auto 28px;max-width:64rem;padding:0 24px;font-family:HBSerif,serif;font-weight:300;font-size:clamp(30px,4vw,44px);letter-spacing:-.02em;color:#000;text-align:center}
+.ph-actions{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:30px}
+.ph-actions a{display:inline-flex;align-items:center;gap:8px;border:1px solid #111827;padding:9px 18px;font-size:12px;color:#111827;transition:background .2s,color .2s}
+.ph-actions a:hover{background:#111827;color:#fff}
+.ph-actions a.alt{border-color:#e5e7eb;color:#6b7280}.ph-actions a.alt:hover{background:#f3f4f6;color:#111827}
+/* footer */
+.pf{max-width:64rem;margin:80px auto 0;padding:0 24px}
+.pf-top{text-align:center;padding:8px 0 36px}
+.pf-name{font-family:HBSerif,serif;font-weight:300;font-size:clamp(40px,11vw,128px);line-height:1;letter-spacing:-.035em;color:#000;user-select:none}
+.pf-name i{font-style:italic;font-size:1.2em}
+.pf-role{margin-top:14px;font-size:13px;font-weight:300;color:#9ca3af}
+.pf-mail{display:inline-block;margin-top:8px;font-size:13px;color:#374151;text-decoration:underline;text-decoration-color:#d1d5db;text-underline-offset:4px;transition:text-decoration-color .2s}
+.pf-mail:hover{text-decoration-color:#000}
+.pf-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:18px 28px;padding:20px 0 28px;border-top:1px solid #f3f4f6;font-size:12px}
+.pf-id{display:flex;align-items:center;gap:12px;color:#9ca3af}.pf-id img{width:21px;height:28px;opacity:.4}
+.pf-bar nav{display:flex;flex-wrap:wrap;gap:8px 24px;color:#6b7280}.pf-bar a{transition:color .2s}.pf-bar a:hover{color:#000}
+@media (max-width:640px){.ph-hero{padding:56px 20px 48px}.pf-bar{justify-content:center;text-align:center}}
