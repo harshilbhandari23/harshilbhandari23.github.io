@@ -12,6 +12,10 @@
   if (window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches) return;
 
   var TIME = { start: 80, hold: 800, scrambleIn: 420, scrambleOut: 200, open: 750, close: 720, maxWait: 1600, safety: 6000 };
+  /* phones: a shorter version, because it plays on every page and slower connections add their own wait */
+  if (window.matchMedia && matchMedia('(max-width:767px)').matches) {
+    TIME.hold = 450; TIME.scrambleIn = 320; TIME.scrambleOut = 160; TIME.open = 600; TIME.close = 520; TIME.maxWait = 1200;
+  }
 
   function lineLayer(x, y, w, h, alpha) {
     return 'linear-gradient(rgba(var(--hbl),var(' + alpha + ')),rgba(var(--hbl),var(' + alpha + '))) ' + x + ' ' + y + '/' + w + ' ' + h + ' no-repeat';
@@ -51,10 +55,10 @@
     'html[data-hb="open"]::before{--hbr:72vmax;transition:--hbr ' + TIME.open + 'ms ' + EASE_IRIS + '}' +
     /* the dot, the lines and the name */
     'html[data-hb]::after{content:attr(data-hb-label);position:fixed;inset:0;z-index:100001;pointer-events:none;display:flex;align-items:center;justify-content:center;box-sizing:border-box;padding-left:22px;' +
-      'color:var(--hbf);font:400 13px/1 FunnelDisplay,sans-serif;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;background:' + LAYERS + ';' +
+      'color:var(--hbf);font:400 var(--hbfs,13px)/1 FunnelDisplay,sans-serif;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;background:' + LAYERS + ';' +
       '--v1:12.5vw;--v2:25vw;--v3:75vw;--v4:87.5vw;--h1:12.5vh;--h2:87.5vh;--hba:0;--hbp:0;--hbd:calc(50vw - 4px);' +
       'transition:--v1 .7s ' + EASE_LINES + ' .1s,--v2 .7s ' + EASE_LINES + ',--v3 .7s ' + EASE_LINES + ',--v4 .7s ' + EASE_LINES + ' .1s,--h1 .7s ' + EASE_LINES + ',--h2 .7s ' + EASE_LINES + ',--hba .4s ease,--hbp .4s ease,--hbd .55s cubic-bezier(.2,.7,.2,1)}' +
-    'html[data-hb="label"]::after{--v1:calc(50vw - var(--hbw)/2 - 66px);--v2:calc(50vw - var(--hbw)/2);--v3:calc(50vw + var(--hbw)/2);--v4:calc(50vw + var(--hbw)/2 + 66px);--h1:calc(50vh - 29px);--h2:calc(50vh + 29px);--hba:.16;--hbp:.55;--hbd:calc(50vw - var(--hbw)/2 + 24px)}' +
+    'html[data-hb="label"]::after{--v1:max(8px,calc(50vw - var(--hbw)/2 - 66px));--v2:calc(50vw - var(--hbw)/2);--v3:calc(50vw + var(--hbw)/2);--v4:min(calc(100vw - 8px),calc(50vw + var(--hbw)/2 + 66px));--h1:calc(50vh - 29px);--h2:calc(50vh + 29px);--hba:.16;--hbp:.55;--hbd:calc(50vw - var(--hbw)/2 + 24px)}' +
     'html[data-hb="start"]::after{opacity:0;transition:none}' +
     'html[data-hb="open"]::after{opacity:0;transition:opacity .2s ease}' +
     /* page content waits for the circle to open */
@@ -75,6 +79,7 @@
     root.removeAttribute('data-hb-label');
     root.removeAttribute('data-hb-wait');
     root.style.removeProperty('--hbw');
+    root.style.removeProperty('--hbfs');
   }
 
   /* the page's name, from its title */
@@ -84,14 +89,21 @@
     return name.length > 30 ? name.slice(0, 29).trim() + '…' : name;
   }
 
-  function measure(text) {
-    var pad = 26, dot = 22, width = text.length * 10;
+  function measure(text, fs) {
+    var pad = 26, dot = 22, width = text.length * fs * 0.77;
     try {
       var c = document.createElement('canvas').getContext('2d');
-      c.font = '400 13px FunnelDisplay,sans-serif';
-      width = c.measureText(text.toUpperCase()).width + text.length * 13 * 0.12;
+      c.font = '400 ' + fs + 'px FunnelDisplay,sans-serif';
+      width = c.measureText(text.toUpperCase()).width + text.length * fs * 0.12;
     } catch (e) {}
     return Math.ceil(width + dot + pad * 2);
+  }
+  /* the label plus its dot must fit the screen with a margin: try smaller type, then a shorter name */
+  function fit(name) {
+    var room = Math.max(200, (window.innerWidth || 360) - 40), fs = 13, w = measure(name, fs);
+    while (w > room && fs > 10) { fs -= 0.5; w = measure(name, fs); }
+    while (w > room && name.length > 8) { name = name.replace(/…$/, '').slice(0, -1).trim() + '…'; w = measure(name, fs); }
+    return { name: name, width: w, size: fs };
   }
 
   var CHARS = 'ABCDEFGHKLMNOPRSTUXZ';
@@ -131,9 +143,10 @@
 
   safety = setTimeout(finish, TIME.safety);
 
-  setTimeout(function () {
-    var name = pageName();
-    root.style.setProperty('--hbw', measure(name) + 'px');
+  function begin() {
+    var f = fit(pageName()), name = f.name;
+    root.style.setProperty('--hbw', f.width + 'px');
+    root.style.setProperty('--hbfs', f.size + 'px');
     state('label');
     scramble(name, TIME.scrambleIn);
     setTimeout(function () {
@@ -145,6 +158,11 @@
         });
       });
     }, TIME.hold);
+  }
+  setTimeout(function () {
+    /* give the label font up to 300ms to arrive; measuring with a stand-in font would misplace the lines */
+    var fontReady = (document.fonts && document.fonts.load) ? Promise.race([document.fonts.load('400 13px FunnelDisplay'), new Promise(function (r) { setTimeout(r, 300); })]) : Promise.resolve();
+    fontReady.then(begin, begin);
   }, TIME.start);
 
   /* ---------- on leaving: the circle closes, then the next page takes over ---------- */
