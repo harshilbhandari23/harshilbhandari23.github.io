@@ -33,6 +33,18 @@ function start() {
 
   /* ---------- collecting the drawing ---------- */
   const surface = [], normals = [], lines = [];
+  /* Heights and depths below are written in the camera's spec millimetres (101.5 mm tall, 74 mm deep), but widths
+     follow the photos, where the body is 130 mm across. Nikon's photos from every side agree the body is 1.36 times
+     as wide as it is tall, so heights and depths are scaled by SQ to match the widths. Round parts (the mount, dials,
+     buttons and their markings) are placed with rigid(), which moves them without squashing them, so they stay round. */
+  const SQ = 0.94;
+  let RIG = null;
+  function place(v) {
+    if (RIG) { v.y = RIG[0] * SQ + (v.y - RIG[0]); v.z = RIG[1] * SQ + (v.z - RIG[1]); }
+    else { v.y *= SQ; v.z *= SQ; }
+    return v;
+  }
+  function rigid(y, z, fn) { const prev = RIG; RIG = [y, z]; fn(); RIG = prev; }
 
   /* add a solid. `angle` is how sharp a crease must be, in degrees, to get a line */
   function solid(geometry, x = 0, y = 0, z = 0, rx = 0, ry = 0, rz = 0, angle = 28) {
@@ -50,20 +62,26 @@ function start() {
     const nm = new Matrix3().setFromMatrix4(m);
     for (let i = 0; i < pos.count; i++) {
       v.fromBufferAttribute(pos, i);
-      const out = sum.get(key(v)).clone().applyMatrix3(nm).normalize();
-      v.applyMatrix4(m);
+      const out = sum.get(key(v)).clone().applyMatrix3(nm);
+      if (!RIG) { out.y /= SQ; out.z /= SQ; }
+      out.normalize();
+      place(v.applyMatrix4(m));
       surface.push(v.x, v.y, v.z);
       normals.push(out.x, out.y, out.z);
     }
     if (angle === null) return;   /* a sculpted form: only its outline and any lines drawn on it by hand */
     const edges = new EdgesGeometry(geometry, angle).attributes.position;
     for (let i = 0; i < edges.count; i++) {
-      v.fromBufferAttribute(edges, i).applyMatrix4(m);
+      place(v.fromBufferAttribute(edges, i).applyMatrix4(m));
       lines.push(v.x, v.y, v.z);
     }
   }
 
-  function seg(a, b) { lines.push(a[0], a[1], a[2], b[0], b[1], b[2]); }
+  const _a = new Vector3(), _b = new Vector3();
+  function seg(a, b) {
+    place(_a.set(a[0], a[1], a[2])); place(_b.set(b[0], b[1], b[2]));
+    lines.push(_a.x, _a.y, _a.z, _b.x, _b.y, _b.z);
+  }
   function poly(list, closed = true) {
     for (let i = 0; i < list.length - (closed ? 0 : 1); i++) seg(list[i], list[(i + 1) % list.length]);
   }
@@ -87,7 +105,7 @@ function start() {
     solid(geo, 0, 0, z0 + chamfer, 0, 0, 0, angle);
   }
   /* a solid between outlines at different depths. Every outline needs the same number of points */
-  function loft(list, angle = 34) {
+  function loft(list, angle = 34, upright = false) {
     /* always build front-to-back from low z to high z, with outlines running anticlockwise, so faces point outwards */
     const sections = list.slice().sort((a, b) => a.z - b.z).map((S) => {
       const area = S.pts.reduce((sum, p, i) => { const q = S.pts[(i + 1) % S.pts.length]; return sum + p.x * q.y - q.x * p.y; }, 0);
@@ -111,6 +129,12 @@ function start() {
         push(A, S.z); push(P, S.z); push(Q, S.z);
       });
     });
+    if (upright) {
+      /* slices were built as (x, plan z, height); stand them up as (x, height, z). That mirrors the solid, so flip each
+         triangle to keep it facing outwards */
+      for (let i = 0; i < pos.length; i += 3) { const t = pos[i + 1]; pos[i + 1] = pos[i + 2]; pos[i + 2] = t; }
+      for (let i = 0; i < pos.length; i += 9) for (let k = 0; k < 3; k++) { const t = pos[i + 3 + k]; pos[i + 3 + k] = pos[i + 6 + k]; pos[i + 6 + k] = t; }
+    }
     const g = new BufferGeometry();
     g.setAttribute('position', new Float32BufferAttribute(pos, 3));
     g.computeVertexNormals();
@@ -147,16 +171,16 @@ function start() {
   function turned(x, y, z, profile, axis = 'y', flip = false, segments = 56) {
     const geo = new LatheGeometry(profile.map(([r, h]) => new Vector2(r, h)), segments);
     const rx = axis === 'z' ? (flip ? -Math.PI / 2 : Math.PI / 2) : 0, rz = axis === 'x' ? (flip ? Math.PI / 2 : -Math.PI / 2) : 0;
-    solid(geo, x, y, z, rx, 0, rz, 30);
+    rigid(y, z, () => solid(geo, x, y, z, rx, 0, rz, 30));
   }
   /* a dial's ridges, as lines on its rim */
   function ridges(x, y, z, r, h, count, axis = 'y', from = 0, to = Math.PI * 2) {
-    for (let i = 0; i < count; i++) {
+    rigid(y, z, () => { for (let i = 0; i < count; i++) {
       const t = from + (to - from) * i / count, c = Math.cos(t) * (r + 0.02), s = Math.sin(t) * (r + 0.02);
       if (axis === 'y') seg([x + c, y, z + s], [x + c, y + h, z + s]);
       else if (axis === 'x') seg([x, y + c, z + s], [x + h, y + c, z + s]);
       else seg([x + c, y + s, z], [x + c, y + s, z + h]);
-    }
+    } });
   }
   /* a push button on the back of the camera: a collar, then a domed cap. In axis z, -height is towards the back */
   function backButton(x, y, r, z = ZB, h = 1.6, collar = 0.9) {
@@ -169,12 +193,12 @@ function start() {
   function circle(x, y, z, r, n = 26) {
     const pts = [];
     for (let i = 0; i < n; i++) { const t = i / n * Math.PI * 2; pts.push([x + Math.cos(t) * r, y + Math.sin(t) * r, z]); }
-    poly(pts);
+    rigid(y, z, () => poly(pts));
   }
   function circleFlat(x, y, z, r) {
     const pts = [];
     for (let i = 0; i < 20; i++) { const t = i / 20 * Math.PI * 2; pts.push([x + Math.cos(t) * r, y, z + Math.sin(t) * r]); }
-    poly(pts);
+    rigid(y, z, () => poly(pts));
   }
   function circleSide(x, y, z, r) {
     const pts = [];
@@ -272,17 +296,19 @@ function start() {
   const HX = fx(468);                                     /* centre of the viewfinder hump */
 
   /* ---------- body ---------- */
-  /* three depths, as on the real camera: a level rear deck with a lower shoulder under the main dial,
-     then the grip's head rising in the middle and front. Only true edges get lines, so no seams show between them */
-  const DECK = fy(250), HEAD = 33.1, SHOULDER = 23.5, ZMID = -14;
-  function bodyOutline(edge) {
+  /* as on the real camera (Nikon's top and side photos): at the back corner a lower shoulder holds the main dial; in
+     front of it one flat plate carries the top display and the model name right across to the grip's edge; then the
+     plate rises in a gentle slope to the grip's raised head, which carries the shutter and buttons. Only true edges
+     get lines, so no seams show between the parts */
+  const DECK = fy(250), HEAD = 33.1, SHOULDER = 23.5, ZSH = -12;
+  function bodyOutline(edge, H = HEAD) {
     const s = new Shape();
     s.moveTo(fx(150), fy(563));
     s.lineTo(fx(250), fy(563)); s.lineTo(fx(262), fy(560));
     s.lineTo(fx(652), fy(560)); s.quadraticCurveTo(fx(672), fy(558), fx(672), fy(530));
     s.lineTo(fx(672), fy(280)); s.quadraticCurveTo(fx(672), DECK, fx(642), DECK);
-    s.lineTo(fx(edge), DECK); s.quadraticCurveTo(fx(edge - 6), HEAD, fx(edge - 34), HEAD);
-    s.lineTo(fx(180), HEAD); s.quadraticCurveTo(fx(140), fy(240), fx(135), fy(280));
+    s.lineTo(fx(edge), DECK); s.quadraticCurveTo(fx(edge - 6), H, fx(edge - 34), H);
+    s.lineTo(fx(180), H); s.quadraticCurveTo(fx(140), H - 1.5, fx(135), fy(280));
     s.lineTo(fx(133), fy(535)); s.quadraticCurveTo(fx(133), fy(563), fx(150), fy(563));
     return s;
   }
@@ -297,10 +323,12 @@ function start() {
     return s;
   }
   const outlinePts = (s, z, n = 6) => s.getPoints(n).map((p) => [p.x, p.y, z]);
-  slab(rearOutline(), ZB, ZMID, 0, null);
-  slab(bodyOutline(262), ZMID, 0, 0, null);
+  slab(rearOutline(), ZB, ZSH, 0, null);
+  /* the plate and its slope up to the grip's head */
+  loft([[ZSH, DECK + 0.02], [-6.5, DECK + 0.3], [-4.5, DECK + 1.1], [-2.5, DECK + 2.4], [-1, HEAD - 0.5], [0, HEAD]]
+    .map(([z, H]) => ({ z, pts: ordered(bodyOutline(262, H), 6) })), null);
   const frontPlate = bodyOutline(296);
-  frontPlate.holes.push(new Path().absarc(MX, MY, 27.5, 0, Math.PI * 2, true));
+  frontPlate.holes.push(new Path().absellipse(MX, MY, 27.5, 27.5 / SQ, 0, Math.PI * 2, true));   /* round once scaled */
   slab(frontPlate, 0, ZF, 0, null);
   poly(outlinePts(rearOutline(), ZB));
   const frontEdge = new Path();
@@ -309,20 +337,23 @@ function start() {
   frontEdge.lineTo(fx(672), fy(280)); frontEdge.quadraticCurveTo(fx(672), DECK, fx(642), DECK);
   frontEdge.lineTo(fx(296), DECK);
   poly(frontEdge.getPoints(6).map((p) => [p.x, p.y, ZF]), false);
-  /* the steps between the depths, and the shoulder's edges running front to back */
-  const headBack = new Path();
-  headBack.moveTo(fx(262), DECK); headBack.quadraticCurveTo(fx(256), HEAD, fx(228), HEAD);
-  headBack.lineTo(fx(180), HEAD); headBack.quadraticCurveTo(fx(140), fy(240), fx(135), fy(280));
-  poly(headBack.getPoints(6).map((p) => [p.x, p.y, ZMID]), false);
+  /* the dial's shoulder: its edges running front to back, and the step up to the plate in front of it */
   const shoulder = new Path();
   shoulder.moveTo(-44, DECK); shoulder.lineTo(-48, SHOULDER); shoulder.lineTo(-60, SHOULDER); shoulder.quadraticCurveTo(-65.6, SHOULDER - 0.5, -65.6, 14);
-  poly(shoulder.getPoints(6).map((p) => [p.x, p.y, ZMID]), false);
-  seg([-44, DECK, ZB], [-44, DECK, ZMID]); seg([-48, SHOULDER, ZB], [-48, SHOULDER, ZMID]); seg([-60, SHOULDER, ZB], [-60, SHOULDER, ZMID]);
+  poly(shoulder.getPoints(6).map((p) => [p.x, p.y, ZSH]), false);
+  const plateEdge = new Path();
+  plateEdge.moveTo(-44, DECK); plateEdge.lineTo(fx(180), DECK); plateEdge.quadraticCurveTo(fx(140), DECK - 1.5, fx(135), fy(280));
+  poly(plateEdge.getPoints(6).map((p) => [p.x, p.y, ZSH]), false);
+  seg([-44, DECK, ZB], [-44, DECK, ZSH]); seg([-48, SHOULDER, ZB], [-48, SHOULDER, ZSH]); seg([-60, SHOULDER, ZB], [-60, SHOULDER, ZSH]);
   const headFront = new Path();
   headFront.moveTo(fx(296), DECK); headFront.quadraticCurveTo(fx(290), HEAD, fx(262), HEAD);
   poly(headFront.getPoints(6).map((p) => [p.x, p.y, 0]), false);
 
-  /* the grip: measured from the side and top photos. Its top slopes away to the front, and it narrows towards the fingers */
+  /* the grip, built as horizontal slices stacked from the base to the top. Seen from above (Nikon's top photo) it comes
+     to a point at the front, set towards the lens: the outer side sweeps back in a long curve while the side facing the
+     lens runs almost straight. PLAN is that outline, traced from the photo: [z, x of the side facing the lens, x of the
+     outer side]. Higher up, the head is a dome that falls away to the front and the outer side; lower down, the hand grip
+     is narrower on the side facing the lens, so the head overhangs it with a ledge below the sub-command dial */
   const lerpTable = (table, z) => {
     if (z <= table[0][0]) return table[0][1];
     for (let i = 1; i < table.length; i++) {
@@ -330,40 +361,50 @@ function start() {
     }
     return table[table.length - 1][1];
   };
-  const eased = (table, z) => (lerpTable(table, z - 1.5) + 2 * lerpTable(table, z) + lerpTable(table, z + 1.5)) / 4;
-  const GRIP = {
-    top: [[8, HEAD], [10, HEAD], [23, 31], [30, 28], [34, 23.6], [36, 15.4], [37, 7]],
-    left: [[8, -65.6], [25, -65], [30, -63.5], [33, -61], [36, -57], [37, -54]],
-    right: [[8, -36], [25, -36.5], [33, -37.5], [36, -39], [37, -41]],
-    head: [[8, -27.3], [20, -28.5], [28, -33], [33, -37.5], [37, -41]],
-    bottom: [[8, -50.75], [30, -50.75], [33, -50.2], [36, -48], [37, -45]]
-  };
-  function gripSection(z) {
-    const L = eased(GRIP.left, z), R = eased(GRIP.right, z), T = eased(GRIP.top, z), B = eased(GRIP.bottom, z);
-    const H = Math.max(R, eased(GRIP.head, z)), rb = 5, rt = Math.min(7, (H - L) / 3, (T - B) / 3);
-    const neckHi = Math.min(fy(326), T - rt - 0.5), neckLo = neckHi - 7;
-    const s = new Shape();
-    s.moveTo(L + rb, B);
-    s.lineTo(R - rb, B); s.quadraticCurveTo(R, B, R, B + rb);
-    s.lineTo(R, neckLo); s.quadraticCurveTo(R, neckHi, H, neckHi);
-    s.lineTo(H, T - rt); s.quadraticCurveTo(H, T, H - rt, T);
-    s.lineTo(L + rt, T); s.quadraticCurveTo(L, T, L, T - rt);
-    s.lineTo(L, B + rb); s.quadraticCurveTo(L, B, L + rb, B);
-    return { z, pts: ordered(s, 6) };
+  const PLAN = [[8, -26.4, -65.5], [10.3, -26.5, -65.4], [14.3, -27.2, -65.1], [18.2, -28.1, -64.5], [22.2, -29.2, -63.1],
+    [26.1, -30.7, -61.1], [28.1, -31.7, -59.6], [30.1, -33, -57.5], [31.6, -34.3, -55.3], [32.6, -35.5, -53.4],
+    [33.6, -36.9, -51], [34.4, -38.6, -48.4], [35, -40.6, -46.4]];
+  const TIP = [35.4, -43.4], GRIP_BACK = 8;
+  /* how far forward the grip reaches at each height: the dome falls away near the top */
+  const REACH = [[-50.75, 32.5], [-50.2, 34], [-49, 34.9], [-47, 35.3], [-45, 35.4], [24, 35.4], [26.6, 33.2], [28.3, 30.4], [29.6, 26.6], [30.6, 23.5], [31.4, 20.5], [32.4, 15], [33.1, 10]];
+  /* how far in from the plan each side is at each height: rounding at the base and over the dome */
+  const IN_OUTER = [[-50.75, 3.5], [-50.2, 2], [-49, 0.8], [-47, 0.2], [-45, 0], [21, 0], [26, 1.3], [29, 3.6], [31, 6.4], [32.3, 9.4], [33.1, 13]];
+  const IN_LENS = [[-50.75, 2.5], [-50.2, 1.4], [-49, 0.5], [-47, 0], [30, 0], [31.5, 1.2], [32.5, 3], [33.1, 5.5]];
+  /* below the head the side facing the lens steps back to here; the head overhangs it */
+  const NECK = [[-60, -35.6], [11.6, -35.6], [13.4, -26]];
+  /* height of the grip's top at a point on its centre line, for seating the shutter and buttons */
+  const gripTop = (z) => lerpTable(REACH.slice(5).map(([y, r]) => [r, y]).reverse(), z);
+  function gripSlice(y) {
+    const reach = lerpTable(REACH, y), k = (reach - GRIP_BACK) / (TIP[0] - GRIP_BACK);
+    const io = lerpTable(IN_OUTER, y), il = lerpTable(IN_LENS, y), neck = lerpTable(NECK, y);
+    const Z = (z) => GRIP_BACK + (z - GRIP_BACK) * k;
+    /* each traced row, moved in where this height is narrower; the two sides never cross */
+    const rows = PLAN.map(([z, xl, xo]) => {
+      let a = xo + io, b = Math.min(xl, neck) - il;
+      if (b - a < 0.8) { const m = (a + b) / 2; a = m - 0.4; b = m + 0.4; }
+      return [Z(z), a, b];
+    });
+    const last = rows[rows.length - 1], tipX = Math.min(Math.max(TIP[1] + (io - il) * 0.15, last[1] + 0.2), last[2] - 0.2);
+    /* the outer side from the back to the tip, then the side facing the lens from the tip back */
+    const pts = rows.map(([z, a]) => new Vector2(a, z));
+    pts.push(new Vector2(tipX, Z(TIP[0])));
+    for (let i = rows.length - 1; i >= 0; i--) pts.push(new Vector2(rows[i][2], rows[i][0]));
+    return { z: y, pts };
   }
-  const gripTris = loft([8, 12, 16, 20, 23, 26, 28, 30, 31.5, 33, 34, 35, 35.7, 36.3, 36.7, 37].map(gripSection), null);
+  const gripTris = loft([-50.75, -50.2, -49.4, -48.4, -47, -45, -30, -10, 6, 11.6, 12.5, 13.4, 14.5, 18, 21, 24, 26, 27.6, 29, 30.1,
+    30.9, 31.6, 32.2, 32.7, 33.1].map(gripSlice), null, true);
   /* lines drawn on the grip's curved surface: where the metal head meets the leatherette, the red stripe, the dial's slot, and the join with the body */
   contour(gripTris, 0, 1, 0.2, 20.3, (p) => p.z > 10.5);
   contour(gripTris, 0, 1, 0.2, 21, (p) => p.x < -60 && p.z > 11 && p.z < 30);
-  contour(gripTris, 0, 1, 0, 21.2, (p) => p.z > 28 && Math.abs(p.x + 45.8) < 10.5);
-  contour(gripTris, 0, 1, 0, 14.8, (p) => p.z > 28 && Math.abs(p.x + 45.8) < 10.5);
+  contour(gripTris, 0, 1, 0, 21.2, (p) => p.z > 28 && Math.abs(p.x + 44.6) < 10.5);
+  contour(gripTris, 0, 1, 0, 14.8, (p) => p.z > 28 && Math.abs(p.x + 44.6) < 10.5);
   contour(gripTris, 0, 0, 1, 10.25, (p) => p.x > -45 && p.y < 31);
 
   /* ---------- viewfinder hump ---------- */
   /* from the front it tapers to the top; from above it widens towards the back. Its lower edge sweeps around the mount */
   const HUMP_TOP = 47.6;
   function humpSection(z, topY, halfBase, halfTop) {
-    const s = new Shape(), r = 3.5, yb = MY + Math.sqrt(36 * 36 - halfBase * halfBase), mid = MY + 36;
+    const s = new Shape(), r = 3.5, R = 36 / SQ, yb = MY + Math.sqrt(R * R - halfBase * halfBase), mid = MY + R;
     s.moveTo(HX - halfBase, yb); s.quadraticCurveTo(HX, 2 * mid - yb, HX + halfBase, yb);
     s.lineTo(HX + halfTop + 1, topY - r); s.quadraticCurveTo(HX + halfTop, topY, HX + halfTop - r, topY);
     s.lineTo(HX - halfTop + r, topY); s.quadraticCurveTo(HX - halfTop, topY, HX - halfTop - 1, topY - r);
@@ -395,57 +436,62 @@ function start() {
   turned(HX + 18.2, 41, -25, [[0, 0], [3.4, 0], [3.4, 1], [2.6, 1.4], [0, 1.4]], 'x', false);
 
   /* ---------- lens mount ---------- */
+  const atMount = (fn) => rigid(MY, ZF, fn);
   function ring(r0, r1, z0, z1) {
     const s = new Shape();
     s.absarc(MX, MY, r1, 0, Math.PI * 2, false);
     s.holes.push(new Path().absarc(MX, MY, r0, 0, Math.PI * 2, true));
-    slab(s, z0, z1);
+    atMount(() => slab(s, z0, z1));
   }
   ring(32.2, 35, ZF, ZF + 2.2);          /* black collar */
   ring(27.5, 32.2, ZF, ZF + 3.6);        /* polished bayonet ring */
   /* its four screws, with slots */
-  [45, 135, 225, 315].forEach((deg) => {
+  atMount(() => [45, 135, 225, 315].forEach((deg) => {
     const a = deg * Math.PI / 180, x = MX + Math.cos(a) * 29.9, y = MY + Math.sin(a) * 29.9, z = ZF + 3.62;
     circle(x, y, z, 1.5, 16);
     seg([x - Math.cos(a + 0.8) * 1.1, y - Math.sin(a + 0.8) * 1.1, z], [x + Math.cos(a + 0.8) * 1.1, y + Math.sin(a + 0.8) * 1.1, z]);
-  });
+  }));
   /* bayonet tabs inside the throat */
   [[0.25, 1.15], [2.0, 2.95], [3.75, 5.35]].forEach(([a, b]) => {
     const tab = new Shape();
     tab.absarc(MX, MY, 27.5, a, b, false);
     tab.absarc(MX, MY, 25.2, b, a, true);
-    slab(tab, ZF - 3.4, ZF - 1.6);
+    atMount(() => slab(tab, ZF - 3.4, ZF - 1.6));
   });
   /* the 11 electrical contacts, along the top of the throat */
   const contacts = new Shape();
   contacts.absarc(MX, MY, 25.2, Math.PI / 2 - 0.68, Math.PI / 2 + 0.68, false);
   contacts.absarc(MX, MY, 22.2, Math.PI / 2 + 0.68, Math.PI / 2 - 0.68, true);
-  slab(contacts, ZF - 7, ZF - 6.5);
-  for (let i = 0; i < 11; i++) {
-    const a = Math.PI / 2 + (i - 5) * 0.105;
-    circle(MX + Math.cos(a) * 23.7, MY + Math.sin(a) * 23.7, ZF - 6.48, 0.65, 10);
-  }
+  atMount(() => {
+    slab(contacts, ZF - 7, ZF - 6.5);
+    for (let i = 0; i < 11; i++) {
+      const a = Math.PI / 2 + (i - 5) * 0.105;
+      circle(MX + Math.cos(a) * 23.7, MY + Math.sin(a) * 23.7, ZF - 6.48, 0.65, 10);
+    }
+  });
   /* the sensor, with its housing behind the throat */
   box(MX, MY, 0.05, 47, 34, 0.5);
   box(MX, MY, 0.4, 40.5, 28.5, 0.4);
   box(MX, MY, 0.75, 35.9, 23.9, 0.3);
   /* index mark on the collar */
-  circle(fx(559), fy(284), ZF + 2.23, 0.9, 12);
+  atMount(() => circle(fx(559), fy(284), ZF + 2.23, 0.9, 12));
 
   /* ---------- front of the body ---------- */
   /* the raised strip that carries the two function buttons, hugging the mount */
   const strip = new Shape();
   strip.absarc(MX, MY, 40.5, Math.PI * 0.76, Math.PI * 1.27, false);
   strip.absarc(MX, MY, 35, Math.PI * 1.27, Math.PI * 0.76, true);
-  slab(strip, ZF, ZF + 1.2);
+  atMount(() => slab(strip, ZF, ZF + 1.2));
   /* Fn1 and Fn2: tall rounded keys, following the curve of the mount */
   function fnKey(u, v, deg, w = 6.4, h = 11.5) {
     const k = rrect(-w / 2, -h / 2, w / 2, h / 2, 2.4);
     const geo = new ExtrudeGeometry(k, { depth: 1.6, bevelEnabled: true, bevelThickness: 0.5, bevelSize: 0.5, bevelOffset: -0.5, bevelSegments: 1, curveSegments: 10 });
-    solid(geo, fx(u), fy(v), ZF + 1.1, 0, 0, deg * Math.PI / 180);
     const inner = rrect(-w / 2 + 1.1, -h / 2 + 1.1, w / 2 - 1.1, h / 2 - 1.1, 1.5).getSpacedPoints(30).slice(0, 30);
     const a = deg * Math.PI / 180, ca = Math.cos(a), sa = Math.sin(a);
-    poly(inner.map((p) => [fx(u) + p.x * ca - p.y * sa, fy(v) + p.x * sa + p.y * ca, ZF + 3.22]));
+    atMount(() => {
+      solid(geo, fx(u), fy(v), ZF + 1.1, 0, 0, deg * Math.PI / 180);
+      poly(inner.map((p) => [fx(u) + p.x * ca - p.y * sa, fy(v) + p.x * sa + p.y * ca, ZF + 3.22]));
+    });
   }
   fnKey(311, 386, 0);
   fnKey(331, 472, 28);
@@ -459,8 +505,10 @@ function start() {
   const SLOPE_UP = [0, 0.755, -0.657], SLOPE_OUT = [0, 0.657, 0.755];
   nikonMark([HX + SLOPE_OUT[0] * 0.14, 38.1 + 0.755 * 4 + SLOPE_OUT[1] * 0.14, 10 - 0.657 * 4 + SLOPE_OUT[2] * 0.14], [1, 0, 0], SLOPE_UP, 4.6);
   /* Fn1 and Fn2, printed on the body beside their keys */
-  word('Fn1', [fx(312), fy(413), ZF + 1.24], [1, 0, 0], [0, 1, 0], 1.7);
-  word('Fn2', [fx(321), fy(441), ZF + 1.24], [1, 0, 0], [0, 1, 0], 1.7);
+  atMount(() => {
+    word('Fn1', [fx(312), fy(413), ZF + 1.24], [1, 0, 0], [0, 1, 0], 1.7);
+    word('Fn2', [fx(321), fy(441), ZF + 1.24], [1, 0, 0], [0, 1, 0], 1.7);
+  });
   /* round cover on the right shoulder */
   turned(fx(634), fy(277), ZF, [[0, 0], [3.2, 0], [3.2, 0.5], [2.6, 0.7], [0, 0.7]], 'z');
   /* panel seams, where the body's covering meets the metal top and base */
@@ -469,35 +517,37 @@ function start() {
   poly([[fx(262), fy(548), ZF + 0.03], [fx(672), fy(548), ZF + 0.03]], false);
 
   /* ---------- top of the grip ---------- */
-  /* shutter release in its power-switch collar, tilted to follow the slope of the grip */
-  const SX_ = -45.8, SY_ = 30.4, SZ_ = 19, TILT = 0.2;
-  solid(new LatheGeometry([[0, 0], [10, 0], [10, 1.8], [9, 2.4], [5.6, 2.4], [0, 2.4]].map(([r, h]) => new Vector2(r, h)), 56), SX_, SY_, SZ_, TILT, 0, 0, 30);
-  solid(new LatheGeometry([[0, 0], [5.4, 0], [5.4, 1.2], [4.6, 2.5], [2.4, 2.8], [0, 2.8]].map(([r, h]) => new Vector2(r, h)), 40), SX_, SY_ + 2.35, SZ_ + 0.48, TILT, 0, 0, 30);
-  /* the power switch lever */
-  box(SX_ + 11.5, SY_ + 0.9, SZ_ + 4, 6, 1.6, 4, TILT, -0.5, 0);
+  /* shutter release in its power-switch collar, near the front of the grip and tilted to follow its slope */
+  const SX_ = -44.6, SZ_ = 25.5, SY_ = gripTop(SZ_) - 0.9, TILT = 0.26;
+  rigid(SY_, SZ_, () => {
+    solid(new LatheGeometry([[0, 0], [8.3, 0], [8.3, 1.8], [7.5, 2.4], [5, 2.4], [0, 2.4]].map(([r, h]) => new Vector2(r, h)), 56), SX_, SY_, SZ_, TILT, 0, 0, 30);
+    solid(new LatheGeometry([[0, 0], [4.8, 0], [4.8, 1.2], [4.1, 2.5], [2.2, 2.8], [0, 2.8]].map(([r, h]) => new Vector2(r, h)), 40), SX_, SY_ + 0.9, SZ_ + 0.24, TILT, 0, 0, 30);
+    /* the power switch lever, sticking out at the front of the collar */
+    box(SX_ - 1.2, SY_ + 0.2, SZ_ + 8.6, 4.2, 1.8, 3.6, TILT, 0, 0);
+  });
   /* the sub-command dial, set into the front of the grip: a wide drum that only just breaks the surface */
   const drum = new CylinderGeometry(9.6, 9.6, 5.6, 64);
   drum.scale(1, 1, 0.47);
-  solid(drum, -45.8, 18, 33.5, 0, 0, 0, 40);
-  for (let i = 0; i <= 46; i++) {
-    const t = -0.15 + (Math.PI + 0.3) * i / 46, x = -45.8 + Math.cos(t) * 9.63, z = 33.5 + Math.sin(t) * 4.53;
-    seg([x, 15.2, z], [x, 20.8, z]);
-  }
-  /* record, ISO and exposure buttons, in an arc behind the shutter */
-  topButton(-35, 31.7, 13, 2.8);
-  engrave(ICON.record, [-35, 33.14, 13], [-1, 0, 0], [0, 0, 1], 1.5);
-  topButton(fx(180), HEAD - 0.2, 4.5, 2.6);
-  engrave(ICON.expo, [fx(180), HEAD + 1.24, 4.5], [-1, 0, 0], [0, 0, 1], 1.35);
-  topButton(-44, HEAD - 0.2, 5.8, 2.6);
-  word('ISO', [-44, HEAD + 1.24, 5.8], [-1, 0, 0], [0, 0, 1], 1.15);
-  /* OFF and ON, printed on the power-switch collar in front of the shutter. The collar tilts forward by TILT */
-  const collarU = [0, -Math.sin(TILT), Math.cos(TILT)];
-  [['OFF', 3.8], ['ON', -3.4]].forEach(([t, dx]) => {
-    const dz = 7.4;
-    word(t, [SX_ + dx, SY_ + 2.4 - Math.tan(TILT) * dz + 0.18, SZ_ + dz], [-1, 0, 0], collarU, 1.0);
+  rigid(18, 32.1, () => {
+    solid(drum, -44.6, 18, 32.1, 0, 0, 0, 40);
+    for (let i = 0; i <= 46; i++) {
+      const t = -0.15 + (Math.PI + 0.3) * i / 46, x = -44.6 + Math.cos(t) * 9.63, z = 32.1 + Math.sin(t) * 4.53;
+      seg([x, 15.2, z], [x, 20.8, z]);
+    }
   });
+  /* record, ISO and exposure buttons, in an arc behind the shutter. Each label is placed with its button */
+  const RY = gripTop(12.2) - 0.4;
+  rigid(RY, 12.2, () => { topButton(-35.1, RY, 12.2, 2.8); engrave(ICON.record, [-35.1, RY + 1.44, 12.2], [-1, 0, 0], [0, 0, 1], 1.5); });
+  rigid(HEAD - 0.2, 7.5, () => { topButton(-55.1, HEAD - 0.2, 7.5, 2.6); engrave(ICON.expo, [-55.1, HEAD + 1.24, 7.5], [-1, 0, 0], [0, 0, 1], 1.35); });
+  rigid(HEAD - 0.2, 8.1, () => { topButton(-45.1, HEAD - 0.2, 8.1, 2.6); word('ISO', [-45.1, HEAD + 1.24, 8.1], [-1, 0, 0], [0, 0, 1], 1.15); });
+  /* OFF and ON, printed on the power-switch collar behind the shutter. The collar tilts forward by TILT */
+  const collarU = [0, -Math.sin(TILT), Math.cos(TILT)];
+  rigid(SY_, SZ_, () => [['OFF', 4.6], ['ON', -2.8]].forEach(([t, dx]) => {
+    const dz = -6.3;
+    word(t, [SX_ + dx, SY_ + 2.4 - Math.tan(TILT) * dz + 0.18, SZ_ + dz], [-1, 0, 0], collarU, 1.0);
+  }));
   /* the model name, on the grip's top surface behind the exposure button */
-  word('Z6III', [-50, HEAD + 0.06, -8], [-1, 0, 0], [0, 0, 1], 2.6);
+  word('Z6III', [-52, DECK + 0.62, -6.6], [-1, 0, 0], [0, 0, 1], 2.6);
   /* top display, on the deck between the hump and the grip */
   const LX0 = -34, LX1 = -11.7, LZ0 = -1, LZ1 = -23;
   box((LX0 + LX1) / 2, DECK + 0.25, (LZ0 + LZ1) / 2, LX1 - LX0 + 1.2, 0.5, LZ0 - LZ1 + 1.2);
@@ -511,11 +561,12 @@ function start() {
   turned(DX, DY, DZ, [[0, 0], [14.2, 0], [14.2, 0.8], [13, 0.8], [13, 6.4], [12.2, 7], [6.2, 7], [6.2, 7.4], [5.6, 7.8], [0, 7.8]], 'y', false, 72);
   ridges(DX, DY + 0.8, DZ, 13, 5.6, 80, 'y');
   /* the modes, printed around the dial's top with each label's top pointing outwards */
-  ['P', 'S', 'A', 'M', 'U1', 'U2', 'U3'].forEach((t, i) => {
-    const a = Math.PI / 2 + i * (TAU / 9), dx = Math.cos(a), dz = Math.sin(a);
+  /* angles in degrees around the dial, as in Nikon's top photo: P towards the back on the shoulder side, AUTO towards the hump */
+  rigid(DY, DZ, () => [['P', -45], ['S', -90], ['A', -135], ['M', 180], ['U3', 135], ['U2', 90], ['U1', 45]].forEach(([t, deg]) => {
+    const a = deg * Math.PI / 180, dx = Math.cos(a), dz = Math.sin(a);
     word(t, [DX + dx * 9.3, DY + 7.04, DZ + dz * 9.3], [-dz, 0, dx], [dx, 0, dz], 1.9);
-  });
-  engrave([[[-0.7, -0.7], [-0.7, 0.7], [0.7, 0.7], [0.7, -0.7], [-0.7, -0.7]], arc(0, 0, 0.35, 0.35, 0, TAU, 10)], [DX + Math.cos(Math.PI / 2 - TAU / 9) * 9.3, DY + 7.04, DZ + Math.sin(Math.PI / 2 - TAU / 9) * 9.3], [-1, 0, 0], [0, 0, 1], 1.2);   /* the green AUTO mark */
+  }));
+  rigid(DY, DZ, () => engrave([[[-0.7, -0.7], [-0.7, 0.7], [0.7, 0.7], [0.7, -0.7], [-0.7, -0.7]], arc(0, 0, 0.35, 0.35, 0, TAU, 10)], [DX + 9.3, DY + 7.04, DZ], [-1, 0, 0], [0, 0, 1], 1.2));   /* the green AUTO mark */
 
   /* ---------- back: viewfinder and eyecup ---------- */
   /* the eyecup's outline, as seen from behind: narrow at the top, widest low down */
@@ -566,17 +617,17 @@ function start() {
   /* sub-selector joystick */
   turned(bx(556), by(333), ZB, [[0, 0], [5.8, 0], [5.8, 0.6], [3.6, 0.6], [3.4, 2.4], [2.6, 3.2], [0, 3.4]], 'z', true);
   const JX = bx(556), JY = by(333), JZ = ZB - 3.42;
-  seg([JX - 2.2, JY, JZ], [JX + 2.2, JY, JZ]); seg([JX, JY - 2.2, JZ], [JX, JY + 2.2, JZ]);
+  rigid(JY, ZB, () => { seg([JX - 2.2, JY, JZ], [JX + 2.2, JY, JZ]); seg([JX, JY - 2.2, JZ], [JX, JY + 2.2, JZ]); });
   /* info button */
   backButton(bx(550), by(380), 2.9, ZB, 1.5, 0.5);
   /* multi selector, OK in the centre */
   turned(bx(568), by(436), ZB, [[0, 0], [9.6, 0], [9.6, 1.1], [8.6, 1.6], [4.8, 1.6], [4.8, 0.9], [0, 0.9]], 'z', true, 72);
   backButton(bx(568), by(436), 4.1, ZB - 0.9, 1.4, 0);
-  for (let i = 0; i < 4; i++) {
+  rigid(by(436), ZB, () => { for (let i = 0; i < 4; i++) {
     const t = i * Math.PI / 2, r0 = 7.2, r1 = 8.2, x = bx(568), y = by(436), z = ZB - 1.62;
     seg([x + Math.cos(t - 0.14) * r0, y + Math.sin(t - 0.14) * r0, z], [x + Math.cos(t) * r1, y + Math.sin(t) * r1, z]);
     seg([x + Math.cos(t + 0.14) * r0, y + Math.sin(t + 0.14) * r0, z], [x + Math.cos(t) * r1, y + Math.sin(t) * r1, z]);
-  }
+  } });
   /* zoom, menu and playback */
   backButton(bx(548), by(492), 2.9, ZB, 1.4, 0.5);
   backButton(bx(590), by(492), 3, ZB, 1.4, 0.5);
@@ -604,26 +655,30 @@ function start() {
   /* ---------- back: the icons and names printed on the buttons, as on Nikon's photo ----------
      Seen from behind, text reads towards -x. Each mark sits just behind its button's cap. */
   const BR = [-1, 0, 0], BU = [0, 1, 0], mark = (z) => z - 0.05;
-  engrave(ICON.frames, [bx(172), by(283), mark(ZB - 2.05)], BR, BU, 1.6);          /* release mode */
-  engrave(ICON.trash, [bx(215), by(283), mark(ZB - 2.05)], BR, BU, 1.6);           /* delete */
-  engrave(ICON.key, [bx(172), by(306), mark(ZB - 0.5)], BR, BU, 1.3);              /* protect, printed below the pair */
-  engrave(ICON.camera, [bx(444), by(266), mark(ZB)], BR, BU, 1.1);                 /* still / video, either side of DISP's lever */
-  engrave(ICON.video, [bx(444), by(298), mark(ZB)], BR, BU, 1.1);
-  word('DISP', [bx(475), by(280), mark(ZB - 3.35)], BR, BU, 1.5);
-  word('AF-ON', [bx(555), by(280), mark(ZB - 2.15)], BR, BU, 1.25);
-  word('i', [bx(550), by(380), mark(ZB - 1.85)], BR, BU, 2.8);
-  word('OK', [bx(568), by(436), mark(ZB - 2.65)], BR, BU, 1.9);
-  engrave(ICON.zoomIn, [bx(548), by(492), mark(ZB - 1.75)], BR, BU, 1.6);
-  word('MENU', [bx(590), by(492), mark(ZB - 1.75)], BR, BU, 1.05);
-  engrave(ICON.zoomOut, [bx(546), by(528), mark(ZB - 1.75)], BR, BU, 1.6);
-  engrave(ICON.play, [bx(591), by(528), mark(ZB - 1.75)], BR, BU, 1.5);
+  const engraveB = (icon, O, s) => rigid(O[1], ZB, () => engrave(icon, O, BR, BU, s));
+  const wordB = (t, O, h) => rigid(O[1], ZB, () => word(t, O, BR, BU, h));
+  engraveB(ICON.frames, [bx(172), by(283), mark(ZB - 2.05)], 1.6);          /* release mode */
+  engraveB(ICON.trash, [bx(215), by(283), mark(ZB - 2.05)], 1.6);           /* delete */
+  engraveB(ICON.key, [bx(172), by(306), mark(ZB - 0.5)], 1.3);              /* protect, printed below the pair */
+  engraveB(ICON.camera, [bx(444), by(266), mark(ZB)], 1.1);                 /* still / video, either side of DISP's lever */
+  engraveB(ICON.video, [bx(444), by(298), mark(ZB)], 1.1);
+  wordB('DISP', [bx(475), by(280), mark(ZB - 3.35)], 1.5);
+  wordB('AF-ON', [bx(555), by(280), mark(ZB - 2.15)], 1.25);
+  wordB('i', [bx(550), by(380), mark(ZB - 1.85)], 2.8);
+  wordB('OK', [bx(568), by(436), mark(ZB - 2.65)], 1.9);
+  engraveB(ICON.zoomIn, [bx(548), by(492), mark(ZB - 1.75)], 1.6);
+  wordB('MENU', [bx(590), by(492), mark(ZB - 1.75)], 1.05);
+  engraveB(ICON.zoomOut, [bx(546), by(528), mark(ZB - 1.75)], 1.6);
+  engraveB(ICON.play, [bx(591), by(528), mark(ZB - 1.75)], 1.5);
 
   /* ---------- sides ---------- */
   /* strap lugs: a post with a ring */
   [fx(672), fx(133)].forEach((x, i) => {
     const y = i === 0 ? fy(268) : 19, dir = i === 0 ? 1 : -1;
-    box(x + dir * 0.6, y, -8, 3.2, 5, 5);
-    solid(new TorusGeometry(2.9, 0.65, 8, 26), x + dir * 3.6, y, -8, 0, Math.PI / 2, 0, 48);
+    rigid(y, -8, () => {
+      box(x + dir * 0.6, y, -8, 3.2, 5, 5);
+      solid(new TorusGeometry(2.9, 0.65, 8, 26), x + dir * 3.6, y, -8, 0, Math.PI / 2, 0, 48);
+    });
   });
   const door = (x, z0, z1, y0, y1, r = 2.2) => poly(rrect(z0, y0, z1, y1, r).getPoints(4).map((p) => [x, p.y, p.x]));
   /* port covers on the mode-dial side: microphone and headphone, then USB and HDMI */
@@ -650,7 +705,7 @@ function start() {
   const scene = new Scene(), model = new Group();
   scene.add(model);
   /* centre the camera on its real middle, including the eyecup */
-  const offsetZ = (ZG + ZE) / -2;
+  const offsetZ = (ZG + ZE) * SQ / -2;
   function shifted(list) {
     const out = new Float32Array(list.length);
     for (let i = 0; i < list.length; i += 3) { out[i] = list[i]; out[i + 1] = list[i + 1]; out[i + 2] = list[i + 2] + offsetZ; }
@@ -701,6 +756,10 @@ function start() {
     const half = Math.tan((camera.fov / 2) * Math.PI / 180);
     camera.position.set(0, 0, 96 / Math.min(half, half * camera.aspect));
     camera.updateProjectionMatrix();
+    cw = w; ch = h;
+    if (entering) return;
+    tNow = openTarget();
+    setOffset();
     draw();
   }
   function draw() { renderer.render(scene, camera); }
@@ -714,7 +773,7 @@ function start() {
 
   canvas.addEventListener('pointerdown', (e) => {
     dragging = true; lastX = e.clientX; lastY = e.clientY;
-    canvas.setPointerCapture(e.pointerId);
+    try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* the pointer has already gone */ }
     canvas.classList.add('is-drag');
   });
   canvas.addEventListener('pointermove', (e) => {
@@ -728,9 +787,193 @@ function start() {
   canvas.addEventListener('pointerup', release);
   canvas.addEventListener('pointercancel', release);
 
+  /* ---------- the specs: at rest the camera sits in the middle of the section. When the specs open (hover with a mouse,
+     a tap on a touch screen, or keyboard focus) they slide in on the right and the camera glides left into the space
+     beside them. It moves by shifting the view, not by resizing the canvas, so the drawing stays steady. Phones keep the
+     specs below the camera, so nothing moves there. ---------- */
+  const grid = canvas.closest('.pc-grid'), info = grid.querySelector('.pc-info');
+  const wide = window.matchMedia ? matchMedia('(min-width:768px)') : { matches: true };
+  let cw = 1, ch = 1, tNow = 0, shiftRaf = 0, closeTimer = 0, downX = 0, downY = 0;
+  const openTarget = () => (grid.classList.contains('is-open') && wide.matches ? 1 : 0);
+  /* tNow runs 0 (centred) to 1 (beside the specs). Open, the camera moves left by half the panel's width and,
+     where the space left is narrower than the canvas is tall (tablets), zooms out so all of it still shows. */
+  function setOffset() {
+    const pw = info.getBoundingClientRect().width || cw * 0.42;
+    const fit = Math.min(1, (cw - pw) * 1.04 / Math.min(cw, ch));
+    camera.zoom = 1 - tNow * (1 - fit);
+    const shift = tNow * pw / 2;
+    if (shift < 0.5) camera.clearViewOffset();
+    else camera.setViewOffset(cw, ch, shift, 0, cw, ch);
+    camera.updateProjectionMatrix();
+  }
+  function glide() {
+    shiftRaf = 0;
+    if (entering) return;
+    const target = openTarget();
+    tNow += (target - tNow) * (reduced ? 1 : 0.14);
+    if (Math.abs(target - tNow) < 0.002) tNow = target;
+    setOffset();
+    draw();
+    if (tNow !== openTarget()) shiftRaf = requestAnimationFrame(glide);
+  }
+  const toggle = grid.querySelector('.pc-toggle'), closeBtn = grid.querySelector('.pc-close');
+  function setOpen(open) {
+    clearTimeout(closeTimer);
+    if (grid.classList.contains('is-open') === open) return;
+    grid.classList.toggle('is-open', open);
+    if (toggle) toggle.setAttribute('aria-expanded', String(open));
+    if (!shiftRaf) shiftRaf = requestAnimationFrame(glide);
+  }
+  /* the "Nikon Z6 III" button under the camera opens and closes the details; so do the panel's close button and Escape */
+  if (toggle) toggle.addEventListener('click', () => {
+    if (entering) return;
+    const open = !grid.classList.contains('is-open');
+    setOpen(open);
+    /* on phones the details open below the camera, so bring them into view */
+    if (open && !wide.matches) setTimeout(() => info.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'nearest' }), 60);
+    if (open && wide.matches && closeBtn) closeBtn.focus({ preventScroll: true });
+  });
+  if (closeBtn) closeBtn.addEventListener('click', () => { setOpen(false); if (toggle) toggle.focus({ preventScroll: true }); });
+  /* a click or tap on the camera (not a drag) opens the photos */
+  let downT = 0;
+  canvas.addEventListener('pointerdown', (e) => { downX = e.clientX; downY = e.clientY; downT = performance.now(); });
+  canvas.addEventListener('pointerup', (e) => {
+    const still = Math.abs(e.clientX - downX) < 7 && Math.abs(e.clientY - downY) < 7 && performance.now() - downT < 600;
+    if (still) { enterPhotos(); return; }
+  });
+  /* keyboard: Enter or Space on the camera opens the photos; Escape closes the details */
+  grid.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && grid.classList.contains('is-open')) { setOpen(false); if (toggle) toggle.focus({ preventScroll: true }); }
+    if ((e.key === 'Enter' || e.key === ' ') && e.target === canvas) { e.preventDefault(); enterPhotos(); }
+  });
+
+  /* ---------- into the photos: the camera turns round to show its back, the view closes in on its screen until the
+     screen fills the window, and the photo sections come up behind it one after another ---------- */
+  let entering = false;
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+  const easeIn = (t) => t * t * t;
+  function tween(ms, step) {
+    return new Promise((done) => {
+      const t0 = performance.now();
+      (function tick(now) {
+        const t = Math.min(1, (now - t0) / ms);
+        step(t);
+        if (t < 1) requestAnimationFrame(tick); else done();
+      })(t0);
+    });
+  }
+  /* a point of the model, in pixels within the canvas */
+  function onCanvas(x, y, z) {
+    model.updateMatrixWorld();
+    const v = new Vector3(x, y * SQ, z * SQ + offsetZ).applyMatrix4(model.matrixWorld).project(camera);
+    return [(v.x + 1) / 2 * cw, (1 - v.y) / 2 * ch];
+  }
+  const SCREEN = [[bx(175), by(345)], [bx(478), by(345)], [bx(478), by(523)], [bx(175), by(523)]];
+  function photosIn() {
+    /* the photo sections after the camera, each one revealed a beat after the one before */
+    const secs = [].slice.call(document.querySelectorAll('.ph-sub')).filter((el) => el.id !== 'camera');
+    const marks = [];
+    secs.forEach((sec, i) => [].slice.call(sec.querySelectorAll('.cs-reveal')).forEach((el, j) => {
+      el.classList.remove('in');
+      el.style.transitionDelay = (i * 0.32 + Math.min(j, 8) * 0.07).toFixed(2) + 's';
+      marks.push(el);
+    }));
+    return () => {
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        const lim = window.innerHeight * 1.05, later = [];
+        marks.forEach((el) => { if (el.getBoundingClientRect().top < lim) el.classList.add('in'); else { el.style.transitionDelay = ''; later.push(el); } });
+        /* the rest come up as they are scrolled to */
+        if (later.length && window.IntersectionObserver) {
+          const io = new IntersectionObserver((list) => list.forEach((en) => { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } }), { rootMargin: '0px 0px -8% 0px' });
+          later.forEach((el) => io.observe(el));
+        } else later.forEach((el) => el.classList.add('in'));
+        setTimeout(() => marks.forEach((el) => { el.style.transitionDelay = ''; }), 2600);
+      }));
+    };
+  }
+  function goToPhotos() {
+    const first = document.querySelector('.ph-sub:not(#camera)');
+    if (!first) return;
+    const top = first.getBoundingClientRect().top + window.scrollY - 76;   /* clear of the floating menu bar */
+    window.scrollTo({ top, behavior: 'instant' });
+    const h = first.querySelector('h2');
+    if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); }
+  }
+  async function enterPhotos() {
+    if (entering) return;
+    if (reduced) { const show = photosIn(); goToPhotos(); show(); return; }
+    entering = true;
+    clearTimeout(closeTimer);
+    canvas.classList.remove('is-drag');
+    /* bring the camera to the middle of the window first */
+    const r = canvas.getBoundingClientRect(), off = r.top + r.height / 2 - window.innerHeight / 2;
+    if (Math.abs(off) > 30) { window.scrollTo({ top: window.scrollY + off, behavior: 'smooth' }); await sleep(450); }
+    /* the details slide away and the camera turns round to face its back */
+    grid.classList.remove('is-open');
+    const x0 = rotX, y0 = rotY, t0 = tNow;
+    let turn = Math.PI - (((y0 % TAU) + TAU) % TAU);
+    if (turn > Math.PI) turn -= TAU;
+    if (turn < -Math.PI) turn += TAU;
+    if (Math.abs(turn) < 1.2) turn += turn < 0 ? -TAU : TAU;
+    await tween(1150, (t) => {
+      const k = ease(t);
+      rotX = x0 * (1 - k); rotY = y0 + turn * k;
+      tNow = t0 * (1 - k); setOffset();
+      model.rotation.set(rotX, rotY, 0); draw();
+    });
+    /* close in on the screen, keeping it in the middle */
+    camera.zoom = 1; camera.clearViewOffset(); camera.updateProjectionMatrix();
+    const pts = SCREEN.map(([x, y]) => onCanvas(x, y, ZM - 0.05));
+    const cx = pts.reduce((a, p) => a + p[0], 0) / 4, cy = pts.reduce((a, p) => a + p[1], 0) / 4;
+    const sw = Math.max(...pts.map((p) => p[0])) - Math.min(...pts.map((p) => p[0]));
+    const sh = Math.max(...pts.map((p) => p[1])) - Math.min(...pts.map((p) => p[1]));
+    const zEnd = Math.min(0.92 * cw / sw, 0.92 * ch / sh);
+    const view = (z) => {
+      camera.zoom = z;
+      camera.setViewOffset(cw, ch, (cx - cw / 2) * z, (cy - ch / 2) * z, cw, ch);
+      camera.updateProjectionMatrix(); draw();
+    };
+    await tween(850, (t) => view(1 + (zEnd - 1) * easeIn(t)));
+    /* the screen grows to fill the window, the camera disappears behind it, and the page moves on to the photos */
+    const box = canvas.getBoundingClientRect();
+    const sx0 = box.left + cw / 2 - sw * zEnd / 2, sy0 = box.top + ch / 2 - sh * zEnd / 2;
+    const veil = document.createElement('div');
+    veil.className = 'pc-veil';
+    document.body.appendChild(veil);
+    const vw = window.innerWidth, vh = window.innerHeight, w0 = sw * zEnd, h0 = sh * zEnd;
+    const grow = (t) => {
+      const k = ease(t);
+      veil.style.left = (sx0 * (1 - k) - 2 * k) + 'px';
+      veil.style.top = (sy0 * (1 - k) - 2 * k) + 'px';
+      veil.style.width = (w0 + (vw + 4 - w0) * k) + 'px';
+      veil.style.height = (h0 + (vh + 4 - h0) * k) + 'px';
+      veil.style.borderRadius = (6 * (1 - k)) + 'px';
+    };
+    grow(0);
+    await tween(560, grow);
+    const show = photosIn();
+    goToPhotos();
+    canvas.style.visibility = 'hidden';
+    await sleep(80);
+    veil.style.transition = 'opacity .5s ease';
+    veil.style.opacity = '0';
+    show();
+    await sleep(520);
+    veil.remove();
+    /* put the camera back as it was, ready for when the visitor scrolls back up */
+    rotX = 0.24; rotY = 0.24; tNow = 0;
+    if (toggle) toggle.setAttribute('aria-expanded', 'false');
+    setOffset();
+    model.rotation.set(rotX, rotY, 0); draw();
+    canvas.style.visibility = '';
+    entering = false;
+    wake();
+  }
+
   function frame(now) {
     raf = 0;
-    if (!inView || document.hidden) return;
+    if (!inView || document.hidden || entering) return;
     if (!started) { started = true; startTime = now; }
     if (!reduced) {
       const p = Math.min(1, (now - startTime) / DRAW_MS);
