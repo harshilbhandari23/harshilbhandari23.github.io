@@ -164,8 +164,160 @@ html[data-theme="dark"] .ph-lb button:hover{background:#000;color:#fff}
  .cs-cards{grid-template-columns:1fr}
  .about-grid{grid-template-columns:1fr}.about-grid>div{padding:28px 20px}.about-grid>div+div{border-left:0;border-top:1px solid var(--line)}
 }
+
+.sb-grid{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.5fr);border-top:1px solid var(--line)}
+.sb-info{padding:28px 32px 32px;border-right:1px solid var(--line);min-width:0}
+.sb-os{margin:0 0 14px;font-family:FunnelDisplay,sans-serif;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#9ca3af}
+.sb-desc{margin:0 0 20px;font-family:FunnelDisplay,sans-serif;font-size:14px;line-height:1.6;color:var(--muted)}
+.sb-count{display:inline-block;margin:0 0 18px;padding:4px 10px;border:1px solid var(--line);background:#fafafa;font-family:FunnelDisplay,sans-serif;font-size:11px;letter-spacing:.06em;color:#374151}
+.sb-none{margin:0;padding:14px 16px;border:1px dashed #d1d5db;font-family:FunnelDisplay,sans-serif;font-size:13px;line-height:1.55;color:#9ca3af}
+.sb-list{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}.sb-list li{border-bottom:1px solid var(--line)}
+.sb-row{all:unset;box-sizing:border-box;display:flex;flex-direction:column;gap:3px;width:100%;padding:11px 0;cursor:pointer;font-family:FunnelDisplay,sans-serif;transition:padding .2s}
+.sb-row b{font-weight:400;font-size:14px;color:#111827}.sb-row span{font-size:12px;color:#9ca3af}.sb-row:hover{padding-left:8px}
+.sb-row:focus-visible,.sb-tile:focus-visible,.sb-x:focus-visible,.sb-bar:focus-visible,.sb-crown:focus-visible{outline:2px solid #3b82f6;outline-offset:2px}
+.sb-stage{display:flex;align-items:center;justify-content:center;min-height:520px;padding:56px 28px;background-color:#fff;background-image:radial-gradient(#e5e7eb 1px,transparent 1px);background-size:18px 18px;overflow:hidden}
+/* every device is drawn in the site's own line style: white, a thin dark outline, square-ish corners */
+.sb-device{container-type:inline-size;position:relative;color:#111827}
+.sb-screen{position:relative;overflow:hidden;background:#fff;border:1px solid #111827}
+.sb-home,.sb-view{position:absolute;inset:0}
+.sb-home{display:grid;align-content:start;transition:opacity .3s ease,transform .35s cubic-bezier(.2,.7,.2,1),visibility 0s}
+.sb-tile{all:unset;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:.9cqw;font-family:FunnelDisplay,sans-serif;text-align:center;min-width:0}
+.sb-tile b{font-weight:400;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#374151}
+.sb-ic{display:flex;align-items:center;justify-content:center;aspect-ratio:1;width:100%;overflow:hidden;border:1px solid #111827;background:#fff;font-style:normal;color:#111827}
+.sb-ic img{width:100%;height:100%;object-fit:cover;display:block}
+.sb-slot .sb-ic{border:1px dashed #cbd5e1;color:#cbd5e1}.sb-slot b{color:#cbd5e1}
+.sb-app{cursor:pointer;transition:transform .25s cubic-bezier(.2,.7,.2,1)}.sb-app:hover{transform:translateY(-.5cqw)}.sb-app:hover .sb-ic{background:#111827;color:#fff}
+.sb-app:active{transform:scale(.94)}
+.sb-view{visibility:hidden;opacity:0;transform:scale(.5);background:#fff;overflow:hidden;transition:opacity .3s ease,transform .38s cubic-bezier(.2,.7,.2,1),visibility 0s .38s}
+.sb-frame{position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff;display:block}
+.is-app .sb-view{visibility:visible;opacity:1;transform:none;transition:opacity .25s ease,transform .45s cubic-bezier(.2,.7,.2,1),visibility 0s}
+.is-app .sb-home{opacity:0;transform:scale(.94);visibility:hidden;transition:opacity .3s ease,transform .35s ease,visibility 0s .3s}
+/* ---- Mac ---- */
+.sb-mac{width:min(580px,100%);aspect-ratio:100/67.6}
+.sb-svg .lid,.sb-svg .deck{fill:#fff;stroke:#111827;stroke-width:1.5px;stroke-linejoin:round}
+.sb-svg .deck{fill:#f9fafb}
+.sb-svg .indent{fill:#eef0f3;stroke:#111827;stroke-width:1px}
+.sb-mac .sb-screen{position:absolute;left:3.6cqw;top:2.4cqw;width:92.8cqw;height:58cqw;border-radius:.9cqw;background:#fafafa}
+.sb-notch{position:absolute;top:0;left:50%;z-index:4;width:7.2cqw;height:2.5cqw;margin-left:-3.6cqw;border-radius:0 0 1.1cqw 1.1cqw;background:#111827}
+.sb-menubar{position:absolute;left:0;right:0;top:0;z-index:2;display:flex;align-items:center;gap:1.9cqw;height:2.5cqw;padding:0 1.8cqw;border-bottom:1px solid #e5e7eb;background:rgba(255,255,255,.9);font-family:FunnelDisplay,sans-serif;font-size:max(7px,1.4cqw);color:#374151}
+.sb-menubar b{font-weight:600;color:#111827}.sb-menubar em{margin-left:auto;font-style:normal;color:#9ca3af}
+.sb-mac .sb-home{top:2.5cqw;grid-template-columns:repeat(6,minmax(0,1fr));gap:2.4cqw 1.4cqw;padding:3.2cqw 3.4cqw}
+.sb-mac .sb-ic{border-radius:1.8cqw}.sb-mac .sb-ic span{font-size:3.4cqw}.sb-mac .sb-tile b{font-size:max(8px,1.5cqw)}
+.sb-mac .sb-view{inset:5.6cqw 4cqw 4cqw;top:5.6cqw;border:1px solid #111827;box-shadow:0 1.4cqw 3cqw rgba(17,24,39,.14)}
+.sb-winbar{position:absolute;left:0;right:0;top:0;z-index:2;display:flex;align-items:center;height:3.4cqw;border-bottom:1px solid #e5e7eb;background:#f9fafb;font-family:FunnelDisplay,sans-serif;font-size:max(8px,1.5cqw);color:#374151}
+.sb-x{all:unset;box-sizing:border-box;width:1.5cqw;height:1.5cqw;margin:0 1.4cqw;border-radius:50%;border:1px solid #111827;cursor:pointer;transition:background .2s}.sb-x:hover{background:#111827}
+.sb-win-title{position:absolute;left:0;right:0;text-align:center;pointer-events:none}
+.sb-mac .sb-frame{top:3.4cqw;height:calc(100% - 3.4cqw)}
+/* ---- iPhone ---- */
+.sb-iphone{width:min(250px,100%)}
+.sb-phone{padding:3.4cqw;border:1.5px solid #111827;border-radius:15cqw;background:#fff}
+.sb-iphone .sb-screen{aspect-ratio:9/19.3;border-radius:12cqw}
+.sb-island{position:absolute;top:3cqw;left:50%;z-index:3;width:27cqw;height:7.4cqw;margin-left:-13.5cqw;border-radius:99px;background:#111827}
+.sb-status{position:absolute;left:0;right:0;top:3.2cqw;z-index:2;display:flex;justify-content:space-between;align-items:center;padding:0 9cqw;font-family:FunnelDisplay,sans-serif;font-size:max(8px,3.4cqw);color:#111827}
+.sb-status b{font-weight:600}.sb-iphone .sb-status em{width:7cqw;height:3cqw;border:1px solid #111827;border-radius:1cqw}
+.sb-iphone .sb-home{top:15cqw;bottom:12cqw;grid-template-columns:repeat(4,minmax(0,1fr));gap:4.4cqw 2.6cqw;padding:2cqw 5cqw}
+.sb-iphone .sb-ic{border-radius:4cqw}.sb-iphone .sb-ic span{font-size:7cqw}.sb-iphone .sb-tile b{font-size:max(8px,3cqw)}
+.sb-iphone .sb-view{top:0}.sb-iphone .sb-frame{top:13.4cqw;height:calc(100% - 13.4cqw - 8cqw)}
+.sb-bar{all:unset;box-sizing:border-box;position:absolute;left:50%;bottom:2.4cqw;z-index:4;width:30cqw;height:5cqw;margin-left:-15cqw;cursor:pointer}
+.sb-bar:before{content:"";position:absolute;left:0;right:0;top:50%;height:1.3cqw;margin-top:-.65cqw;border-radius:99px;background:#111827;transition:transform .2s}.sb-bar:hover:before{transform:scaleX(1.12)}
+.sb-btn{position:absolute;width:.9cqw;border:1.5px solid #111827;border-right:0;border-radius:.8cqw 0 0 .8cqw;background:#fff}
+.sb-btn.b1{left:-.9cqw;top:19cqw;height:5cqw}.sb-btn.b2{left:-.9cqw;top:30cqw;height:9cqw}.sb-btn.b3{left:-.9cqw;top:42cqw;height:9cqw}
+.sb-btn.b4{left:auto;right:-.9cqw;top:34cqw;height:14cqw;border:1.5px solid #111827;border-left:0;border-radius:0 .8cqw .8cqw 0}
+/* ---- Apple Watch ---- */
+.sb-watch{width:min(240px,100%);aspect-ratio:100/204;margin:0 auto}
+.sb-svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.sb-svg *{vector-effect:non-scaling-stroke}
+.sb-svg .band,.sb-svg .case{fill:#fff;stroke:#111827;stroke-width:1.5px;stroke-linejoin:round}
+.sb-svg .glass{fill:#fff;stroke:none}
+.sb-svg.sb-over{pointer-events:none}.sb-svg .line{fill:none;stroke:#111827;stroke-width:1px}
+.sb-svg .rib{stroke:#e5e7eb;stroke-width:1px;fill:none}
+.sb-svg .hole circle{fill:#fff;stroke:#111827;stroke-width:1px}
+.sb-watch .sb-screen{position:absolute;left:9.6cqw;top:55.6cqw;width:76.8cqw;height:92.8cqw;border:0;border-radius:0;background:transparent;clip-path:url(#sb-watch-clip)}
+.sb-watch .sb-status{top:3.6cqw;justify-content:flex-end;padding:0 9cqw 0 0;font-size:max(8px,5cqw)}
+.sb-watch .sb-home{top:13cqw;bottom:4cqw;grid-template-columns:repeat(3,minmax(0,1fr));gap:3.4cqw 2.6cqw;padding:0 7.4cqw;align-content:center}
+.sb-watch .sb-ic{border-radius:50%}.sb-watch .sb-ic span{font-size:6.4cqw}.sb-watch .sb-tile b{font-size:max(7px,3.9cqw)}
+.sb-watch .sb-view{border-radius:0}.sb-watch .sb-frame{top:11cqw;height:calc(100% - 11cqw)}
+.sb-crown{all:unset;box-sizing:border-box;position:absolute;left:89cqw;top:76cqw;width:6.6cqw;height:15cqw;border:1.5px solid #111827;border-left:0;border-radius:0 2.4cqw 2.4cqw 0;background:#fff;background-image:repeating-linear-gradient(0deg,transparent 0 1.5cqw,#cbd5e1 1.5cqw calc(1.5cqw + 1px));cursor:pointer;transition:background-color .2s}
+.sb-crown:hover{background-color:#111827}
+.sb-side{position:absolute;left:89.4cqw;top:107cqw;width:3.4cqw;height:21cqw;border:1.5px solid #111827;border-left:0;border-radius:0 1.8cqw 1.8cqw 0;background:#fff}
+/* ---- Meta Quest 3 ---- */
+.sb-quest{display:flex;align-items:center;width:min(580px,100%)}
+.sb-visor{position:relative;flex:1;min-width:0;padding:3.4cqw 3.4cqw 4.6cqw;border:1.5px solid #111827;border-radius:11cqw;background:#fff}
+.sb-quest .sb-screen{aspect-ratio:2/1;border-radius:8cqw;background:#fafafa}
+.sb-strap{flex:none;width:11cqw;height:23cqw;border:1.5px solid #111827;background:#fff;background-image:repeating-linear-gradient(90deg,transparent 0 2cqw,#e5e7eb 2cqw calc(2cqw + 1px))}
+.sb-strap.l{margin-right:-1.5px;border-radius:5cqw 0 0 5cqw}.sb-strap.r{margin-left:-1.5px;border-radius:0 5cqw 5cqw 0}
+.sb-sensor{position:absolute;top:.9cqw;width:1.5cqw;height:1.5cqw;border:1px solid #111827;border-radius:50%}
+.sb-sensor.s1{left:14%}.sb-sensor.s2{left:22%}.sb-sensor.s3{right:22%}.sb-sensor.s4{right:14%}
+.sb-nose{position:absolute;left:50%;bottom:0;width:15cqw;height:3.4cqw;margin-left:-7.5cqw;border:1.5px solid #111827;border-bottom:0;border-radius:99px 99px 0 0}
+.sb-quest .sb-status{top:2.6cqw;justify-content:center;padding:0;font-size:max(8px,1.7cqw)}
+.sb-quest .sb-home{top:6cqw;bottom:9cqw;grid-template-columns:repeat(6,minmax(0,1fr));gap:2cqw;padding:0 7cqw;align-content:center}
+.sb-quest .sb-ic{border-radius:2.2cqw}.sb-quest .sb-ic span{font-size:3.2cqw}.sb-quest .sb-tile b{font-size:max(8px,1.5cqw)}
+.sb-quest .sb-view{inset:6cqw 8cqw 9.4cqw;border:1px solid #111827;border-radius:2cqw;box-shadow:0 1.6cqw 3.4cqw rgba(17,24,39,.16)}
+.sb-meta{all:unset;box-sizing:border-box;position:absolute;left:50%;bottom:2cqw;z-index:4;width:6.4cqw;height:4.6cqw;margin-left:-3.2cqw;display:flex;align-items:center;justify-content:center;border:1px solid #111827;border-radius:99px;background:#fff;cursor:pointer;transition:background-color .2s}
+.sb-meta i{display:block;width:2.4cqw;height:1.3cqw;border:1px solid #111827;border-radius:99px;transition:border-color .2s}
+.sb-meta:hover{background:#111827}.sb-meta:hover i{border-color:#fff}
+.sb-meta:focus-visible{outline:2px solid #3b82f6;outline-offset:2px}
+/* ---- colour: a device keeps its line-art look until the pointer is over it (or it has focus, or an app is open, or the
+   screen is a touch screen). Then it takes the colours of its own system: macOS's blue-violet wallpaper on a silver MacBook, iOS's
+   blue-to-pink wallpaper in a titanium iPhone, watchOS's black screen with its Activity-ring colours on a silver Apple Watch, and Horizon OS's Meta
+   blue in a white Quest. sandbox.js adds .is-hot. Each wallpaper fades in over the screen and the body colours blend. ---- */
+.sb-screen:before{content:"";position:absolute;inset:0;opacity:0;transition:opacity .55s ease;pointer-events:none}
+.sb-device.is-hot .sb-screen:before{opacity:1}
+.sb-svg .band,.sb-svg .case,.sb-svg .glass,.sb-svg .line,.sb-svg .lid,.sb-svg .deck,.sb-svg .indent,.sb-svg .rib,.sb-svg .hole circle{transition:fill .5s ease,stroke .5s ease}
+.sb-phone,.sb-visor,.sb-strap,.sb-btn,.sb-sensor,.sb-nose,.sb-crown,.sb-side,.sb-screen,.sb-ic,.sb-tile b,.sb-status,.sb-menubar,.sb-meta,.sb-meta i,.sb-bar:before{transition:background-color .5s ease,border-color .5s ease,color .5s ease}
+/* empty slots and apps on a coloured screen: frosted glass, white labels */
+.sb-device.is-hot .sb-slot .sb-ic{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.6);color:#fff}
+.sb-device.is-hot .sb-slot b{color:rgba(255,255,255,.8)}
+.sb-device.is-hot .sb-app .sb-ic,.sb-device.is-hot .sb-app:hover .sb-ic{background:#fff;border-color:#fff;color:#111827}
+.sb-device.is-hot .sb-app b{color:#fff}
+/* macOS */
+.sb-mac .sb-screen:before{background:radial-gradient(90% 80% at 10% 0%,#ffb36b 0%,rgba(255,179,107,0) 55%),radial-gradient(85% 95% at 94% 100%,#9a4dff 0%,rgba(154,77,255,0) 62%),linear-gradient(160deg,#1f5bff 0%,#5a3fd1 60%,#b04bd0 100%)}
+.sb-mac.is-hot .sb-svg .lid{fill:#0d0e11;stroke:#b9bdc5}
+.sb-mac.is-hot .sb-svg .deck{fill:#d8dade;stroke:#9aa0a8}
+.sb-mac.is-hot .sb-svg .indent{fill:#c3c6cc;stroke:#9aa0a8}
+.sb-mac.is-hot .sb-screen{border-color:#000}
+.sb-mac.is-hot .sb-menubar{background:rgba(255,255,255,.2);border-bottom-color:rgba(255,255,255,.22);color:rgba(255,255,255,.92)}
+.sb-mac.is-hot .sb-menubar b{color:#fff}.sb-mac.is-hot .sb-menubar em{color:rgba(255,255,255,.75)}
+/* iOS */
+.sb-iphone .sb-screen:before{background:linear-gradient(165deg,#6fd0ff 0%,#4f8cff 38%,#a46bff 72%,#ff8fb8 100%)}
+.sb-iphone.is-hot .sb-phone{background:#0c0c0f;border-color:#a8a296}
+.sb-iphone.is-hot .sb-screen{border-color:#000}
+.sb-iphone.is-hot .sb-status{color:#fff}.sb-iphone.is-hot .sb-status em{border-color:#fff}
+.sb-iphone.is-hot .sb-btn{background:#a8a296;border-color:#8c867a}
+.sb-iphone.is-hot .sb-bar:before{background:#fff}
+/* watchOS: a black screen, and the Activity rings' red, green and blue around the apps */
+.sb-watch.is-hot .sb-svg .case{fill:#e7e8eb;stroke:#8f959e}
+.sb-watch.is-hot .sb-svg .glass{fill:#000}.sb-watch.is-hot .sb-svg .line{stroke:#000}
+.sb-watch.is-hot .sb-svg .band{fill:#f4f5f7;stroke:#9aa0a8}
+.sb-watch.is-hot .sb-svg .rib{stroke:#e1e4e9}
+.sb-watch.is-hot .sb-svg .hole circle{fill:#c9ced6;stroke:#9aa0a8}
+.sb-watch.is-hot .sb-status{color:#fff}
+.sb-watch.is-hot .sb-slot .sb-ic{background:#1c1c1e;border:2px solid var(--ring,#fa114f);color:#8e8e93}
+.sb-watch.is-hot .sb-slot:nth-child(3n+1) .sb-ic{--ring:#fa114f}
+.sb-watch.is-hot .sb-slot:nth-child(3n+2) .sb-ic{--ring:#92e82a}
+.sb-watch.is-hot .sb-slot:nth-child(3n) .sb-ic{--ring:#1eeaef}
+.sb-watch.is-hot .sb-slot b{color:rgba(255,255,255,.55)}
+.sb-watch.is-hot .sb-crown,.sb-watch.is-hot .sb-side{background-color:#d3d6db;border-color:#8f959e}
+.sb-watch.is-hot .sb-crown:hover{background-color:#9aa0a8}
+/* Horizon OS */
+.sb-quest .sb-screen:before{background:radial-gradient(120% 110% at 50% 0%,#3d8bff 0%,#0f4fc9 46%,#071a45 100%)}
+.sb-quest.is-hot .sb-visor{background:#f1f2f4;border-color:#9aa0a8}
+.sb-quest.is-hot .sb-screen{border-color:#0a0a0c}
+.sb-quest.is-hot .sb-strap{background-color:#e5e7eb;border-color:#9aa0a8}
+.sb-quest.is-hot .sb-sensor{background:#111827;border-color:#111827}
+.sb-quest.is-hot .sb-nose{border-color:#9aa0a8}
+.sb-quest.is-hot .sb-status{color:#fff}
+.sb-quest.is-hot .sb-meta{background:rgba(255,255,255,.18);border-color:#fff}.sb-quest.is-hot .sb-meta i{border-color:#fff}
+.sb-quest.is-hot .sb-meta:hover{background:rgba(255,255,255,.4)}
+@media (prefers-reduced-motion:reduce){.sb-screen:before,.sb-svg *{transition:none!important}}
+/* in dark mode the page's colours are inverted; a coloured device puts them back, so each system keeps its own colours (and its app, which dark mode already puts back, is not flipped twice) */
+html[data-theme="dark"] .sb-device{transition:filter .45s ease}
+html[data-theme="dark"] .sb-device.is-hot{filter:invert(1) hue-rotate(180deg)}
+html[data-theme="dark"] .sb-device.is-hot .sb-frame{filter:none!important}
+@media (max-width:900px){.sb-grid{grid-template-columns:minmax(0,1fr)}.sb-info{border-right:0;border-bottom:1px solid var(--line);padding:22px 20px 24px}.sb-stage{min-height:0;padding:40px 16px}}
+@media (prefers-reduced-motion:reduce){.sb-home,.sb-view,.sb-app,.sb-row{transition:none!important}}
 </style><script src="/theme.js"></script><script src="/page-loader.js"></script><script src="/site-nav.js"></script></head>
-<body><div class="cs-rail" style="height:146px"></div><nav class="cs-side" aria-label="Sections"><button data-target="overview" class="on"><span class="mk"><em>+</em><i></i></span><b>Overview</b></button><button data-target="work" class=""><span class="mk"><em>+</em><i></i></span><b>The Work</b></button><button data-target="contact" class=""><span class="mk"><em>+</em><i></i></span><b>Contact</b></button><button data-target="more" class=""><span class="mk"><em>+</em><i></i></span><b>More Works</b></button></nav><main><div class="cs-wrap"><div class="cs cs-fade"><span class="cs-plus tl">+</span><span class="cs-plus tr">+</span><div class="cs-row cs-head"><span class="cs-plus bl">+</span><span class="cs-plus br">+</span><img class="thumb" src="/images/mine/projects/217794979/cover.webp" alt=""/><h1>Railway Accident Data</h1><img class="mark" src="/images/mine/hb.svg" alt="HB"/></div><div id="overview" class="cs-row cs-meta"><div><p class="cs-label">Field</p><p class="cs-val">Graphic Design · Illustration · Visualization</p></div><div><p class="cs-label">Tools</p><p class="cs-val">Illustrator</p></div><div><p class="cs-label">Year</p><p class="cs-val">2025</p></div><div><p class="cs-label">Team</p><p class="cs-val">Solo project</p></div></div><div class="cs-row"><img class="cs-hero" src="/images/mine/projects/217794979/cover.webp" alt="Railway Accident Data"/></div><div class="cs-row cs-brief"><span class="cs-plus bl">+</span><span class="cs-plus br">+</span><p class="cs-kicker cs-reveal">Overview</p><h2 class="cs-title cs-reveal">Data Visualization of Railway Network with Accidents</h2><p class="cs-body cs-reveal" style="color:#9ca3af;font-size:12px">Published January 27th 2025</p><div class="cs-reveal" style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap"><a class="cs-btn" href="https://www.behance.net/gallery/217794979/Data-Visualization-of-Railway-Network-with-Accidents" target="_blank" rel="noopener">View on Behance <span>↗</span></a></div></div><div id="work"><h2 class="cs-row cs-sec cs-reveal"><span class="cs-plus bl">+</span><span class="cs-plus br">+</span>The Work</h2><div class="cs-row cs-stack cs-reveal"><span class="cs-plus bl">+</span><span class="cs-plus br">+</span><img class="cs-img" loading="lazy" src="/images/mine/projects/217794979/01-01.webp" width="1400" height="2200" alt="Railway Accident Data"/><img class="cs-img" loading="lazy" src="/images/mine/projects/217794979/01-02.webp" width="1400" height="2200" alt="Railway Accident Data"/><img class="cs-img" loading="lazy" src="/images/mine/projects/217794979/01-03.webp" width="1400" height="1604" alt="Railway Accident Data"/></div></div></div></div><section id="contact" class="cs-cta"><span class="cs-plus tl">+</span><span class="cs-plus tr">+</span><span class="cs-plus bl">+</span><span class="cs-plus br">+</span><div class="cs-reveal"><p class="cs-kicker" style="margin:0">Let&#x27;s Work Together</p><img src="/images/mine/hb.svg" alt="HB" width="48" height="46" style="margin-top:16px"/><h2>Good work starts with the right conversation.</h2><p class="cs-body" style="margin:0">Have a project in mind, or want to talk about one of these? I&#x27;m available for freelance work.</p></div><div class="cs-links cs-reveal"><a href="mailto:harshilbhandari22@gmail.com">Say hello <span>↗</span></a><a href="mailto:harshilbhandari22@gmail.com">harshilbhandari22@gmail.com <span>✉</span></a><a href="https://www.linkedin.com/in/harshilbhandari/" target="_blank" rel="noopener">LinkedIn <span>↗</span></a></div></section><section id="more" class="cs-more"><h2 class="cs-reveal">More Works</h2><div class="cs-cards"><a class="cs-card cs-reveal" href="/works/the-plague-story-folktale"><div class="pic"><img loading="lazy" src="/images/mine/projects/186507401/cover.webp" alt="The Plague Story"/></div><p>The Plague Story</p><span>Interaction Design · Illustration</span></a><a class="cs-card cs-reveal" href="/works/brand-identity-redesign-rtr"><div class="pic"><img loading="lazy" src="/images/mine/projects/217455067/cover.webp" alt="Rent The Runway"/></div><p>Rent The Runway</p><span>Graphic Design</span></a><a class="cs-card cs-reveal" href="/works/data-manifestation-model"><div class="pic"><img loading="lazy" src="/images/mine/projects/197280265/cover.webp" alt="Data Manifestation Model"/></div><p>Data Manifestation Model</p><span>3D Modeling · Visualization</span></a></div></section></main><footer class="pf"><div class="pf-top"><p class="pf-name" aria-hidden="true"><i>H</i>arshil</p><p class="pf-role">Communication Designer &amp; Researcher</p><a class="pf-mail" href="mailto:harshilbhandari22@gmail.com">harshilbhandari22@gmail.com</a></div><div class="pf-bar"><div class="pf-id"><img src="/images/mine/hb.svg" alt="HB"/><span>© 2026 Harshil Bhandari</span></div><nav aria-label="Footer"><a href="/#work">Work</a><a href="/about/">About</a><a href="/photography/">Photography</a><a href="/publications/">Publications</a></nav><nav aria-label="Elsewhere"><a href="https://www.linkedin.com/in/harshilbhandari/" target="_blank" rel="noopener">LinkedIn</a><a href="https://www.instagram.com/harshilbhandari" target="_blank" rel="noopener">Instagram</a><a href="https://www.behance.net/harshilbhandari22" target="_blank" rel="noopener">Behance</a></nav></div></footer>
+<body><div class="cs-rail" style="height:146px"></div><nav class="cs-side" aria-label="Sections"><button data-target="overview" class="on"><span class="mk"><em>+</em><i></i></span><b>Overview</b></button><button data-target="work" class=""><span class="mk"><em>+</em><i></i></span><b>The Work</b></button><button data-target="contact" class=""><span class="mk"><em>+</em><i></i></span><b>Contact</b></button><button data-target="more" class=""><span class="mk"><em>+</em><i></i></span><b>More Works</b></button></nav><main><div class="cs-wrap"><div class="cs cs-fade"><span class="cs-plus tl">+</span><span class="cs-plus tr">+</span><div class="cs-row cs-head"><span class="cs-plus bl">+</span><span class="cs-plus br">+</span><img class="thumb" src="/images/mine/projects/217794979/cover.webp" alt=""/><h1>Railway Accident Data</h1><img class="mark" src="/images/mine/hb.svg" alt="HB"/></div><div id="overview" class="cs-row cs-meta"><div><p class="cs-label">Field</p><p class="cs-val">Graphic Design · Illustration · Visualization</p></div><div><p class="cs-label">Tools</p><p class="cs-val">Illustrator</p></div><div><p class="cs-label">Year</p><p class="cs-val">2025</p></div><div><p class="cs-label">Team</p><p class="cs-val">Solo project</p></div></div><div class="cs-row"><img class="cs-hero" src="/images/mine/projects/217794979/cover.webp" alt="Railway Accident Data"/></div><div class="cs-row cs-brief"><span class="cs-plus bl">+</span><span class="cs-plus br">+</span><p class="cs-kicker cs-reveal">Overview</p><h2 class="cs-title cs-reveal">Data Visualization of Railway Network with Accidents</h2><p class="cs-body cs-reveal" style="color:#9ca3af;font-size:12px">Published January 27th 2025</p><div class="cs-reveal" style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap"><a class="cs-btn" href="https://www.behance.net/gallery/217794979/Data-Visualization-of-Railway-Network-with-Accidents" target="_blank" rel="noopener">View on Behance <span>↗</span></a></div></div><div id="work"><h2 class="cs-row cs-sec cs-reveal"><span class="cs-plus bl">+</span><span class="cs-plus br">+</span>The Work</h2><div class="cs-row cs-stack cs-reveal"><span class="cs-plus bl">+</span><span class="cs-plus br">+</span><img class="cs-img" loading="lazy" src="/images/mine/projects/217794979/01-01.webp" width="1400" height="2200" alt="Railway Accident Data"/><img class="cs-img" loading="lazy" src="/images/mine/projects/217794979/01-02.webp" width="1400" height="2200" alt="Railway Accident Data"/><img class="cs-img" loading="lazy" src="/images/mine/projects/217794979/01-03.webp" width="1400" height="1604" alt="Railway Accident Data"/></div></div></div></div><section id="contact" class="cs-cta"><span class="cs-plus tl">+</span><span class="cs-plus tr">+</span><span class="cs-plus bl">+</span><span class="cs-plus br">+</span><div class="cs-reveal"><p class="cs-kicker" style="margin:0">Let&#x27;s Work Together</p><img src="/images/mine/hb.svg" alt="HB" width="48" height="46" style="margin-top:16px"/><h2>Good work starts with the right conversation.</h2><p class="cs-body" style="margin:0">Have a project in mind, or want to talk about one of these? I&#x27;m available for freelance work.</p></div><div class="cs-links cs-reveal"><a href="mailto:harshilbhandari22@gmail.com">Say hello <span>↗</span></a><a href="mailto:harshilbhandari22@gmail.com">harshilbhandari22@gmail.com <span>✉</span></a><a href="https://www.linkedin.com/in/harshilbhandari/" target="_blank" rel="noopener">LinkedIn <span>↗</span></a></div></section><section id="more" class="cs-more"><h2 class="cs-reveal">More Works</h2><div class="cs-cards"><a class="cs-card cs-reveal" href="/works/the-plague-story-folktale"><div class="pic"><img loading="lazy" src="/images/mine/projects/186507401/cover.webp" alt="The Plague Story"/></div><p>The Plague Story</p><span>Interaction Design · Illustration</span></a><a class="cs-card cs-reveal" href="/works/brand-identity-redesign-rtr"><div class="pic"><img loading="lazy" src="/images/mine/projects/217455067/cover.webp" alt="Rent The Runway"/></div><p>Rent The Runway</p><span>Graphic Design</span></a><a class="cs-card cs-reveal" href="/works/data-manifestation-model"><div class="pic"><img loading="lazy" src="/images/mine/projects/197280265/cover.webp" alt="Data Manifestation Model"/></div><p>Data Manifestation Model</p><span>3D Modeling · Visualization</span></a></div></section></main><footer class="pf"><div class="pf-top"><p class="pf-name" aria-hidden="true"><i>H</i>arshil</p><p class="pf-role">Communication Designer &amp; Researcher</p><a class="pf-mail" href="mailto:harshilbhandari22@gmail.com">harshilbhandari22@gmail.com</a></div><div class="pf-bar"><div class="pf-id"><img src="/images/mine/hb.svg" alt="HB"/><span>© 2026 Harshil Bhandari</span></div><nav aria-label="Footer"><a href="/#work">Work</a><a href="/about/">About</a><a href="/photography/">Photography</a><a href="/publications/">Publications</a><a href="/sandbox/">Sandbox</a></nav><nav aria-label="Elsewhere"><a href="https://www.linkedin.com/in/harshilbhandari/" target="_blank" rel="noopener">LinkedIn</a><a href="https://www.instagram.com/harshilbhandari" target="_blank" rel="noopener">Instagram</a><a href="https://www.behance.net/harshilbhandari22" target="_blank" rel="noopener">Behance</a></nav></div></footer>
 <script>
 (function(){
   // reveal blocks as they scroll into view (plain position checks, so nothing can stay hidden)

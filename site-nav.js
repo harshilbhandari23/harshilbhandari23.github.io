@@ -13,6 +13,7 @@
     { label: 'Work', href: '/#work', match: function (p) { return p.indexOf('/works/') === 0; } },
     { label: 'Photography', href: '/photography', match: function (p) { return p === '/photography'; } },
     { label: 'Research', href: '/publications', match: function (p) { return p === '/publications'; } },
+    { label: 'Sandbox', href: '/sandbox', match: function (p) { return p === '/sandbox'; } },
     { label: 'About', href: '/about', match: function (p) { return p === '/about'; } }
   ];
   var WORK = [
