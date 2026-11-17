@@ -20,7 +20,8 @@
     { name: 'Design', short: 'Apps, brands, motion, 3D', items: [['Explore Design', '/design/']] },
     { name: 'Fine Arts', short: 'Painting, illustration, film', items: [['Explore Fine Arts', '/fine-arts/']] },
     { name: 'Photography', short: 'Birds, wildlife, astro, street', items: [['Explore Photography', '/photography/']] },
-    { name: 'Research', short: 'Papers and visualization', items: [['Explore Research', '/publications/']] }
+    { name: 'Research', short: 'Papers and visualization', items: [['Explore Research', '/publications/']] },
+    { name: 'Sandbox', short: 'Apps on Mac, iPhone, Watch, Quest', items: [['Explore Sandbox', '/sandbox/'], ['Mac', '/sandbox/#mac'], ['iPhone', '/sandbox/#iphone'], ['Apple Watch', '/sandbox/#watch'], ['Meta Quest 3', '/sandbox/#quest']] }
   ];
   var TOPICS = ['UI/UX & product', 'Brand identity', 'Research', 'Illustration', 'Motion & film', 'Something else'];
 
