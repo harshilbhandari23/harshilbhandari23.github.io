@@ -9,12 +9,16 @@
    - thin lines for creases and details
    - a slightly heavier outline around every form (a copy of the surface, pushed outwards and turned inside
      out), which is what gives curved shapes such as the grip and dials a clean contour from any angle
-   The lines draw themselves in when the model first scrolls into view. Then it turns slowly; drag to turn it
-   by hand. Visitors who reduce motion get the finished drawing, still and draggable. */
+   The lines draw themselves in when the model first scrolls into view.
+
+   On the page the camera sits in a stage that stays pinned to the window while the visitor scrolls through its section.
+   Scrolling turns the camera (it ends showing its back and screen), stirs a ring of particles around it, and carries
+   rings of photographs up past it (see "the pinned stage" below). Drag to turn it by hand; a click or tap goes into the
+   photos. Visitors who reduce motion get the finished drawing in an ordinary section, still and draggable. */
 import {
   BackSide, BoxGeometry, BufferGeometry, CylinderGeometry, EdgesGeometry, ExtrudeGeometry, Float32BufferAttribute,
   Group, LatheGeometry, LineBasicMaterial, LineSegments, Matrix3, Matrix4, Euler, Mesh, MeshBasicMaterial, Path,
-  PerspectiveCamera, Scene, Shape, ShapeUtils, ShaderMaterial, TorusGeometry, Vector2, Vector3, WebGLRenderer
+  PerspectiveCamera, Points, Scene, Shape, ShapeUtils, ShaderMaterial, TorusGeometry, Vector2, Vector3, WebGLRenderer
 } from '/vendor/three.module.min.js';
 
 const canvas = document.getElementById('camera-3d');
@@ -25,9 +29,10 @@ function start() {
   try {
     renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true });
   } catch (err) {
-    canvas.closest('.pc-grid').classList.add('no-model');
-    return;
+    return;   /* without WebGL the section stays as the plain list of the camera's details */
   }
+  const section = canvas.closest('.pc-scroll');
+  section.classList.add('is-live');
   renderer.setClearColor(0x000000, 0);
   const reduced = window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
 
@@ -740,6 +745,45 @@ function start() {
   model.add(hull, fill, ink);
   const camera = new PerspectiveCamera(22, 1, 10, 3000);
 
+  /* ---------- particles: a ragged ring of specks around the camera, facing the viewer like a splash. It drifts round
+     slowly by itself; scrolling stirs it (it turns faster and spreads a little) and it settles again. Each speck is
+     [angle, radius, depth, a random number that sets its own pace, size and strength]. ---------- */
+  const DUST = window.innerWidth < 768 ? 1100 : 1900;
+  let seed = 20240607;
+  const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+  const gauss = () => (rnd() + rnd() + rnd() + rnd() - 2) / 2;
+  const specks = new Float32Array(DUST * 4);
+  for (let i = 0; i < DUST; i++) {
+    let th, keep;
+    /* thicker in some places than others, like the reference splash, never an even circle */
+    do { th = rnd() * TAU; keep = 0.16 + 0.84 * Math.pow(0.5 + 0.5 * Math.sin(2 * th + 0.8), 1.6) * (0.55 + 0.45 * Math.sin(5 * th + 2.1)); } while (rnd() > keep);
+    let r = 118 + 11 * Math.sin(3 * th + 1.3) + 6 * Math.sin(7 * th + 0.4) + gauss() * 9;
+    const fling = rnd();
+    if (fling < 0.16) r += 12 + rnd() * rnd() * 70;        /* drops thrown outwards */
+    else if (fling < 0.22) r -= 8 + rnd() * 16;            /* and a few inside */
+    specks.set([th, r, (rnd() - 0.5) * 46, rnd()], i * 4);
+  }
+  const dustGeo = new BufferGeometry();
+  dustGeo.setAttribute('position', new Float32BufferAttribute(new Float32Array(DUST * 3), 3));
+  dustGeo.setAttribute('speck', new Float32BufferAttribute(specks, 4));
+  const dustMat = new ShaderMaterial({
+    transparent: true, depthWrite: false,
+    uniforms: { time: { value: 0 }, swirl: { value: 0 }, spread: { value: 1 }, dpr: { value: 1 }, fade: { value: reduced ? 1 : 0 }, ink: hullMat.uniforms.ink },
+    vertexShader: 'attribute vec4 speck; uniform float time, swirl, spread, dpr, fade; varying float strength;'
+      + 'void main(){ float s=speck.w;'
+      + 'float a=speck.x+swirl*(0.45+s)+0.1*sin(time*0.5+s*37.0);'
+      + 'float r=speck.y*spread*(1.0+0.045*sin(time*(0.6+s)+s*91.0));'
+      + 'vec3 p=vec3(cos(a)*r, sin(a)*r*0.94, speck.z+6.0*sin(time*0.8+s*53.0));'
+      + 'gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.0);'
+      + 'gl_PointSize=(1.0+2.1*fract(s*7.31)*fract(s*7.31))*dpr;'
+      + 'strength=(0.3+0.7*fract(s*3.17))*fade; }',
+    fragmentShader: 'uniform vec3 ink; varying float strength;'
+      + 'void main(){ vec2 c=gl_PointCoord-0.5; if(dot(c,c)>0.25) discard; gl_FragColor=vec4(ink,strength); }'
+  });
+  const dust = new Points(dustGeo, dustMat);
+  dust.frustumCulled = false;
+  scene.add(dust);
+
   /* ---------- size, looking and turning ---------- */
   const OUTLINE = 1.15;   /* css pixels */
   let outlineNow = reduced ? 1 : 0;
@@ -757,15 +801,33 @@ function start() {
     camera.position.set(0, 0, 96 / Math.min(half, half * camera.aspect));
     camera.updateProjectionMatrix();
     cw = w; ch = h;
+    dustMat.uniforms.dpr.value = dpr;
+    /* the rings of photographs: a twelve-sided drum, sized to stand clear of the camera and the particles, and spaced
+       so that the camera shows between one ring and the next */
+    ringR = Math.round(Math.min(w * (w < 600 ? 0.45 : 0.36), h * 0.42, 340));
+    const panelW = 2 * ringR * Math.tan(Math.PI / 12), panelH = panelW * 0.7, band = Math.max(11, panelW * 0.1);
+    ringReach = panelH / 2 + band + 6;
+    ringPitch = panelH * 2.5 + band * 2;
+    grid.style.setProperty('--R', ringR + 'px');
+    grid.style.setProperty('--W', panelW.toFixed(1) + 'px');
+    grid.style.setProperty('--H', panelH.toFixed(1) + 'px');
+    grid.style.setProperty('--B', band.toFixed(1) + 'px');
     if (entering) return;
     tNow = openTarget();
     setOffset();
+    layoutRings();
     draw();
   }
   function draw() { renderer.render(scene, camera); }
 
-  let rotY = reduced ? 0.5 : 0.24, rotX = 0.24;
-  const SPIN = 0.1;   /* radians a second: one turn takes about a minute */
+  /* rotX and rotY are what the visitor has added by dragging. The rest of the pose comes from how far the page has
+     scrolled through the section (pNow, 0 to 1): one and a half turns, ending on the camera's back, with a dip to show
+     the top plate on the way, and a slow sway so it is never quite still */
+  let rotY = 0, rotX = 0, pNow = 0;
+  function pose(now) {
+    const sway = reduced ? 0 : Math.sin(now / 2600) * 0.09;
+    model.rotation.set(0.24 + rotX + Math.sin(pNow * Math.PI) * 0.26, (reduced ? 0.5 : 0.24) + rotY + pNow * Math.PI * 3 + sway, 0);
+  }
   let lastFrame = 0;
   let dragging = false, lastX = 0, lastY = 0;
   let inView = false, started = false, startTime = 0, raf = 0;
@@ -781,7 +843,7 @@ function start() {
     rotY += (e.clientX - lastX) * 0.009;
     rotX = Math.max(-1.2, Math.min(1.2, rotX + (e.clientY - lastY) * 0.006));
     lastX = e.clientX; lastY = e.clientY;
-    if (reduced) { model.rotation.set(rotX, rotY, 0); draw(); }
+    if (reduced) { pose(0); draw(); }
   });
   const release = () => { dragging = false; canvas.classList.remove('is-drag'); };
   canvas.addEventListener('pointerup', release);
@@ -794,14 +856,17 @@ function start() {
   const grid = canvas.closest('.pc-grid'), info = grid.querySelector('.pc-info');
   const wide = window.matchMedia ? matchMedia('(min-width:768px)') : { matches: true };
   let cw = 1, ch = 1, tNow = 0, shiftRaf = 0, closeTimer = 0, downX = 0, downY = 0;
+  const BASE = 0.46;   /* how big the camera is in its stage: under half the full fit, leaving room for the particles and rings */
+  let ringR = 300, ringReach = 120, ringPitch = 300, sidePanel = 0;
   const openTarget = () => (grid.classList.contains('is-open') && wide.matches ? 1 : 0);
   /* tNow runs 0 (centred) to 1 (beside the specs). Open, the camera moves left by half the panel's width and,
      where the space left is narrower than the canvas is tall (tablets), zooms out so all of it still shows. */
   function setOffset() {
     const pw = info.getBoundingClientRect().width || cw * 0.42;
     const fit = Math.min(1, (cw - pw) * 1.04 / Math.min(cw, ch));
-    camera.zoom = 1 - tNow * (1 - fit);
+    camera.zoom = BASE * (1 - tNow * (1 - fit));
     const shift = tNow * pw / 2;
+    sidePanel = pw;
     if (shift < 0.5) camera.clearViewOffset();
     else camera.setViewOffset(cw, ch, shift, 0, cw, ch);
     camera.updateProjectionMatrix();
@@ -813,6 +878,7 @@ function start() {
     tNow += (target - tNow) * (reduced ? 1 : 0.14);
     if (Math.abs(target - tNow) < 0.002) tNow = target;
     setOffset();
+    layoutRings();
     draw();
     if (tNow !== openTarget()) shiftRaf = requestAnimationFrame(glide);
   }
@@ -829,9 +895,7 @@ function start() {
     if (entering) return;
     const open = !grid.classList.contains('is-open');
     setOpen(open);
-    /* on phones the details open below the camera, so bring them into view */
-    if (open && !wide.matches) setTimeout(() => info.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'nearest' }), 60);
-    if (open && wide.matches && closeBtn) closeBtn.focus({ preventScroll: true });
+    if (open && closeBtn) closeBtn.focus({ preventScroll: true });
   });
   if (closeBtn) closeBtn.addEventListener('click', () => { setOpen(false); if (toggle) toggle.focus({ preventScroll: true }); });
   /* a click or tap on the camera (not a drag) opens the photos */
@@ -900,10 +964,11 @@ function start() {
     const h = first.querySelector('h2');
     if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); }
   }
-  async function enterPhotos() {
+  async function enterPhotos(auto) {
     if (entering) return;
     if (reduced) { const show = photosIn(); goToPhotos(); show(); return; }
     entering = true;
+    grid.classList.add('is-entering');
     clearTimeout(closeTimer);
     canvas.classList.remove('is-drag');
     /* bring the camera to the middle of the window first */
@@ -911,26 +976,28 @@ function start() {
     if (Math.abs(off) > 30) { window.scrollTo({ top: window.scrollY + off, behavior: 'smooth' }); await sleep(450); }
     /* the details slide away and the camera turns round to face its back */
     grid.classList.remove('is-open');
-    const x0 = rotX, y0 = rotY, t0 = tNow;
+    const x0 = model.rotation.x, y0 = model.rotation.y, t0 = tNow;
     let turn = Math.PI - (((y0 % TAU) + TAU) % TAU);
     if (turn > Math.PI) turn -= TAU;
     if (turn < -Math.PI) turn += TAU;
-    if (Math.abs(turn) < 1.2) turn += turn < 0 ? -TAU : TAU;
+    /* a tap on a camera that is already facing the right way adds a full flourish; arriving by scrolling does not, as the camera has just turned */
+    if (!auto && Math.abs(turn) < 1.2) turn += turn < 0 ? -TAU : TAU;
     await tween(1150, (t) => {
       const k = ease(t);
-      rotX = x0 * (1 - k); rotY = y0 + turn * k;
       tNow = t0 * (1 - k); setOffset();
-      model.rotation.set(rotX, rotY, 0); draw();
+      dustMat.uniforms.swirl.value = swirl + k * 0.8;
+      model.rotation.set(x0 * (1 - k), y0 + turn * k, 0); draw();
     });
-    /* close in on the screen, keeping it in the middle */
-    camera.zoom = 1; camera.clearViewOffset(); camera.updateProjectionMatrix();
+    swirl += 0.8;
+    /* close in on the screen, keeping it in the middle. z is how many times closer than the camera's usual size */
+    camera.zoom = BASE; camera.clearViewOffset(); camera.updateProjectionMatrix();
     const pts = SCREEN.map(([x, y]) => onCanvas(x, y, ZM - 0.05));
     const cx = pts.reduce((a, p) => a + p[0], 0) / 4, cy = pts.reduce((a, p) => a + p[1], 0) / 4;
     const sw = Math.max(...pts.map((p) => p[0])) - Math.min(...pts.map((p) => p[0]));
     const sh = Math.max(...pts.map((p) => p[1])) - Math.min(...pts.map((p) => p[1]));
     const zEnd = Math.min(0.92 * cw / sw, 0.92 * ch / sh);
     const view = (z) => {
-      camera.zoom = z;
+      camera.zoom = BASE * z;
       camera.setViewOffset(cw, ch, (cx - cw / 2) * z, (cy - ch / 2) * z, cw, ch);
       camera.updateProjectionMatrix(); draw();
     };
@@ -962,28 +1029,94 @@ function start() {
     await sleep(520);
     veil.remove();
     /* put the camera back as it was, ready for when the visitor scrolls back up */
-    rotX = 0.24; rotY = 0.24; tNow = 0;
+    rotX = 0; rotY = 0; tNow = 0; pNow = progress();
     if (toggle) toggle.setAttribute('aria-expanded', 'false');
+    grid.classList.remove('is-entering');
     setOffset();
-    model.rotation.set(rotX, rotY, 0); draw();
+    layoutRings();
+    pose(performance.now()); draw();
     canvas.style.visibility = '';
     entering = false;
     wake();
   }
 
+  /* ---------- the pinned stage ---------- */
+  /* how far the page has scrolled through the section: 0 as the stage pins, 1 as it lets go */
+  const pin = section.querySelector('.pc-pin');
+  /* browsers too old for overflow:clip cannot pin the stage with CSS on this page, so there it is carried down by hand */
+  const carry = !reduced && !(window.CSS && CSS.supports && CSS.supports('overflow-x', 'clip'));
+  const END = 0.9;   /* the turning and the rings are done by this far through the scroll; the rest is held for the dive */
+  function progress() {
+    const r = section.getBoundingClientRect(), span = r.height - window.innerHeight;
+    if (carry && span > 0) pin.style.transform = 'translateY(' + Math.min(span, Math.max(0, -r.top)).toFixed(1) + 'px)';
+    return span > 0 ? Math.min(1, Math.max(0, -r.top / (span * END))) : 0;
+  }
+  /* the rings: the whole stack rides up through the stage as the page scrolls, from below the bottom edge to above the
+     top one, while each ring turns on its own axis, neighbours in opposite directions. Both layers (behind and in front
+     of the camera) are moved alike. When the details panel is open the rings move left with the camera. */
+  const stacks = [].slice.call(grid.querySelectorAll('.pc-stack'));
+  const rings = stacks.map((st) => [].slice.call(st.querySelectorAll('.pc-ring')));
+  let clock = 0, swirl = 0, energy = 0, lastScroll = window.scrollY;
+  function layoutRings() {
+    if (!stacks.length || reduced) return;
+    /* the far side of a ring shows nearer the middle of the stage than its near side, so start and end well clear */
+    const n = rings[0].length, from = ch * 0.64 + ringReach, to = -ringPitch * (n - 1) - ch * 0.64 - ringReach;
+    const k = Math.min(1, Math.max(0, (pNow - 0.03) / 0.94));
+    const y = from + (to - from) * k, x = -tNow * sidePanel / 2;
+    for (let l = 0; l < stacks.length; l++) {
+      stacks[l].style.transform = 'translate3d(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px,0)';
+      for (let i = 0; i < n; i++) {
+        const turn = (i % 2 ? -1 : 1) * (clock * 6 + pNow * 300) + i * 23;
+        const away = Math.abs(y + i * ringPitch) > ch * 0.72 + ringReach;   /* out of sight: skip it */
+        if (rings[l][i].hidden !== away) rings[l][i].hidden = away;
+        if (!away) rings[l][i].style.transform = 'translateY(' + (i * ringPitch).toFixed(1) + 'px) rotateY(' + turn.toFixed(2) + 'deg)';
+      }
+    }
+  }
+  /* the dive: when the page has been scrolled to the end of the stage, the same zoom that a tap starts plays by itself, once.
+     It only counts when the visitor scrolled up to it (a jump from a link or a search result, or scrolling back up, does not
+     start it), and it is armed again only after they have scrolled back well away from the end. While it plays, the page does
+     not scroll. */
+  let armed = true, prevTarget = progress();
+  const hold = (e) => { if (entering && e.cancelable) e.preventDefault(); };
+  window.addEventListener('wheel', hold, { passive: false });
+  window.addEventListener('touchmove', hold, { passive: false });
+  function checkEnd(target) {
+    if (target < 0.8) armed = true;
+    if (armed && !entering && !reduced && prevTarget < 0.98 && target >= 0.98 && section.getBoundingClientRect().bottom > window.innerHeight * 0.15) {
+      armed = false;
+      enterPhotos(true);
+    }
+    prevTarget = target;
+  }
   function frame(now) {
     raf = 0;
     if (!inView || document.hidden || entering) return;
-    if (!started) { started = true; startTime = now; }
+    if (!started) { started = true; startTime = now; lastFrame = now; }
     if (!reduced) {
+      const dt = Math.min(now - lastFrame, 50) / 1000;
+      lastFrame = now;
       const p = Math.min(1, (now - startTime) / DRAW_MS);
       lineGeo.setDrawRange(0, Math.floor((1 - Math.pow(1 - p, 2.2)) * totalLines / 2) * 2);
       const o = Math.min(1, Math.max(0, (p - 0.55) / 0.45));
       if (o !== outlineNow) { outlineNow = o; setOutline(); }
-      if (!dragging) rotY += SPIN * Math.min(now - lastFrame, 50) / 1000;
-      lastFrame = now;
+      /* follow the scroll a little behind it, so the turning feels weighted */
+      const target = progress();
+      checkEnd(target);
+      pNow += (target - pNow) * 0.1;
+      if (Math.abs(target - pNow) < 0.0003) pNow = target;
+      /* scrolling stirs the particles */
+      const moved = Math.abs(window.scrollY - lastScroll);
+      lastScroll = window.scrollY;
+      energy += (Math.min(1, moved / 45) - energy) * 0.07;
+      clock += dt;
+      swirl += dt * (0.09 + energy * 1.5);
+      const u = dustMat.uniforms;
+      u.time.value = clock; u.swirl.value = swirl; u.spread.value = 1 + energy * 0.16;
+      u.fade.value = Math.min(1, Math.max(0, (p - 0.3) / 0.6));
+      layoutRings();
     }
-    model.rotation.set(rotX, rotY, 0);
+    pose(now);
     draw();
     if (!reduced) raf = requestAnimationFrame(frame);
   }
@@ -998,7 +1131,9 @@ function start() {
   (function holdForLoader() {
     if (document.documentElement.hasAttribute('data-hb-wait')) { setTimeout(holdForLoader, 100); return; }
     resize();
-    model.rotation.set(rotX, rotY, 0);
+    pNow = progress();
+    pose(performance.now());
+    layoutRings();
     draw();
     wake();
   })();

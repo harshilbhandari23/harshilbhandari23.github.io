@@ -69,45 +69,73 @@ a.cs-chip{transition:background .2s,border-color .2s,color .2s}a.cs-chip:hover{b
 @media (min-width:1280px){.cs-rail{display:block}.cs-side{display:flex}}
 .cs-reveal{opacity:0;transform:translateY(28px);transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1)}
 .cs-reveal.in{opacity:1;transform:none}
-.cs-fade{animation:csFade .8s cubic-bezier(.2,.7,.2,1) both}
+/* fill backwards only: a finished animation that keeps its end transform (even an identity one) would trap position:fixed children, such as a full-screen sandbox device */
+.cs-fade{animation:csFade .8s cubic-bezier(.2,.7,.2,1) backwards}
 @keyframes csFade{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.cs-reveal,.cs-fade{opacity:1;transform:none;animation:none;transition:none}}
 .about-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:0}
-.pc-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}
-.pc-grid.no-model{grid-template-columns:minmax(0,1fr)}.pc-grid.no-model .pc-model{display:none}
-.pc-model{position:relative;min-height:440px;border-right:1px solid var(--line);color:#111827}
-.pc-model canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab;touch-action:pan-y;color:#111827}
-.pc-model canvas.is-drag{cursor:grabbing}
-.pc-hint{position:absolute;left:16px;top:14px;margin:0;font-family:FunnelDisplay,sans-serif;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#9ca3af;pointer-events:none}
+/* ---- the camera ----
+   Without scripts (or without WebGL) this section is just the camera's details. With them, camera-3d.js adds .is-live and the
+   section becomes a tall one whose stage stays pinned to the window while the page scrolls through it: the camera turns in the
+   middle inside a swirl of particles, and three rings of photographs rise past it, passing behind and in front. */
+.pc-pin,.pc-grid{position:relative}
+.pc-model,.pc-rings,.pc-toggle,.pc-close{display:none}
 .pc-info{position:relative;padding:28px 32px 32px;min-width:0}
-.pc-toggle{position:absolute;left:50%;bottom:22px;z-index:2;transform:translateX(-50%);background:#fff;font-size:13px;padding:9px 16px 9px 18px;cursor:pointer;transition:background .2s,color .2s,left .6s cubic-bezier(.2,.7,.2,1)}
-.pc-toggle svg{transition:transform .3s ease}.pc-grid.is-open .pc-toggle svg{transform:rotate(180deg)}
-.pc-close{position:absolute;top:14px;right:14px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);background:#fff;color:#111827;font-size:18px;line-height:1;cursor:pointer;transition:background .2s,color .2s}
-.pc-close:hover{background:#111827;color:#fff}
 .pc-info h3{margin:0 0 4px;font-family:HBSerif,serif;font-weight:300;font-size:30px;line-height:1.15;color:#000}
 .pc-sub{margin:0 0 18px;font-family:FunnelDisplay,sans-serif;font-size:13px;color:#6b7280}
 .pc-specs{margin:0 0 20px;border-top:1px solid var(--line)}
 .pc-specs div{display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;padding:9px 0;border-bottom:1px solid var(--line)}
 .pc-specs dt{font-family:FunnelDisplay,sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#9ca3af;padding-top:2px}
 .pc-specs dd{margin:0;font-family:FunnelDisplay,sans-serif;font-size:13px;line-height:1.45;color:#111827}
-.pc-model canvas:focus-visible{outline:2px solid #3b82f6;outline-offset:-4px}
 .ph-sub h2[tabindex="-1"]:focus{outline:none}
 .pc-veil{position:fixed;z-index:200;background:#fff;border:1.5px solid #111827;box-sizing:border-box;pointer-events:none}
-.pc-h-hover,.pc-h-tap{display:none}
-@media (min-width:768px){
-.pc-grid{display:block;position:relative;height:640px;overflow:hidden}
-.pc-model{position:absolute;inset:0;min-height:0;border-right:0}
-.pc-info{position:absolute;top:0;right:0;bottom:0;width:min(420px,46%);padding:26px 30px 24px;background:#fff;border-left:1px solid var(--line);overflow:auto;opacity:0;visibility:hidden;transform:translateX(40px);transition:opacity .35s ease,transform .55s cubic-bezier(.2,.7,.2,1),visibility 0s linear .55s}
-.pc-grid.is-open .pc-info{opacity:1;visibility:visible;transform:none;transition:opacity .45s ease .06s,transform .6s cubic-bezier(.2,.7,.2,1),visibility 0s}
-.pc-grid.is-open .pc-toggle{left:calc((100% - min(420px,46%)) / 2)}
-.pc-specs div{padding:7px 0}
-.pc-h-phone{display:none}
-.pc-grid.no-model{height:auto}.pc-grid.no-model .pc-info{position:static;width:auto;opacity:1;visibility:visible;transform:none;border-left:0}
+/* live: the pinned stage */
+/* pinning needs the window itself to be what scrolls, so the body must not be a scroll box of its own */
+html body{overflow-x:clip;overflow-y:visible}
+.pc-scroll.is-live{height:330vh}
+.is-live .pc-pin{position:sticky;top:0;height:100vh;height:100svh}
+.is-live .pc-grid{height:100%;overflow:hidden}
+.is-live .pc-model{display:block;position:absolute;inset:0;z-index:1;color:#111827}
+.pc-model canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab;touch-action:pan-y;color:#111827}
+.pc-model canvas.is-drag{cursor:grabbing}
+.pc-model canvas:focus-visible{outline:2px solid #3b82f6;outline-offset:-4px}
+.is-live .pc-toggle{display:inline-flex;position:absolute;left:50%;bottom:22px;z-index:3;transform:translateX(-50%);background:#fff;font-size:13px;padding:9px 16px 9px 18px;cursor:pointer;transition:background .2s,color .2s,left .6s cubic-bezier(.2,.7,.2,1)}
+.pc-toggle svg{transition:transform .3s ease}.pc-grid.is-open .pc-toggle svg{transform:rotate(180deg)}
+.is-live .pc-close{display:flex;position:absolute;top:14px;right:14px;width:32px;height:32px;align-items:center;justify-content:center;border:1px solid var(--line);background:#fff;color:#111827;font-size:18px;line-height:1;cursor:pointer;transition:background .2s,color .2s}
+.pc-close:hover{background:#111827;color:#fff}
+/* the details: a panel on the right (a sheet from the bottom on phones), opened by the "Nikon Z6 III" button */
+.is-live .pc-info{position:absolute;z-index:4;top:0;right:0;bottom:0;width:min(420px,46%);padding:84px 30px 24px;background:#fff;border-left:1px solid var(--line);overflow:auto;opacity:0;visibility:hidden;transform:translateX(40px);transition:opacity .35s ease,transform .55s cubic-bezier(.2,.7,.2,1),visibility 0s linear .55s}
+.is-live .pc-close{top:76px}
+.is-live .pc-grid.is-open .pc-info{opacity:1;visibility:visible;transform:none;transition:opacity .45s ease .06s,transform .6s cubic-bezier(.2,.7,.2,1),visibility 0s}
+.is-live .pc-grid.is-open .pc-toggle{left:calc((100% - min(420px,46%)) / 2)}
+.is-live .pc-specs div{padding:7px 0}
+/* the rings of photographs. Each ring is a twelve-sided drum of panels with a lettered band above and below. It is drawn twice:
+   the far half behind the camera and the near half in front of it, so the camera sits inside the ring. camera-3d.js sets the
+   sizes (--R radius, --W and --H panel, --B band) and moves the rings. */
+.is-live .pc-rings{display:block;position:absolute;inset:0;overflow:hidden;pointer-events:none;perspective:calc(var(--R,300px)*4.4);transition:opacity .4s ease}
+.pc-rings.back{z-index:0;opacity:.45}.pc-rings.front{z-index:2}
+.pc-grid.is-entering .pc-rings{opacity:0}
+.pc-stack,.pc-ring{position:absolute;left:0;top:0;width:0;height:0;transform-style:preserve-3d;will-change:transform}
+.pc-stack{left:50%;top:50%}
+.pc-ring[hidden]{display:none}
+.pc-panel,.pc-strip{position:absolute;left:calc(var(--W)/-2);width:calc(var(--W) + 1px);box-sizing:border-box;-webkit-backface-visibility:hidden;backface-visibility:hidden;transform:rotateY(calc(var(--k)*30deg)) translateZ(var(--R))}
+.back .pc-panel,.back .pc-strip{transform:rotateY(calc(var(--k)*30deg)) translateZ(var(--R)) rotateY(180deg)}
+.pc-panel{top:calc(var(--H)/-2);height:var(--H);display:block;overflow:hidden;background:#fff;border:1px solid #111827;color:#111827;text-decoration:none}
+.front .pc-panel{pointer-events:auto;cursor:pointer}
+.pc-panel img{display:block;width:100%;height:100%;object-fit:cover}
+.pc-panel.is-empty{background-image:radial-gradient(#e5e7eb 1px,transparent 1px);background-size:12px 12px}
+.pc-strip{height:var(--B);background:#111827}
+.pc-strip.t{top:calc(var(--H)/-2 - var(--B) - 4px)}.pc-strip.b{top:calc(var(--H)/2 + 4px)}
+@media (min-width:768px) and (max-width:1023px){.is-live .pc-info{width:48%;padding:84px 22px 20px}.is-live .pc-grid.is-open .pc-toggle{left:26%}}
+@media (max-width:767px){
+.pc-scroll.is-live{height:300vh}
+.is-live .pc-toggle{bottom:18px}
+.is-live .pc-info{top:auto;left:0;width:auto;max-height:76%;padding:22px 20px 28px;border-left:0;border-top:1px solid #111827;transform:translateY(40px)}
+.is-live .pc-close{top:14px}
+.is-live .pc-grid.is-open .pc-toggle{left:50%}
 }
-@media (min-width:768px) and (max-width:1023px){.pc-grid{height:760px}.pc-info{width:48%;padding:22px 22px 20px}.pc-grid.is-open .pc-toggle{left:26%}.pc-grid.no-model{height:auto}.pc-grid.no-model .pc-info{width:auto}}
-@media (min-width:768px) and (hover:hover){.pc-h-hover{display:inline}}
-@media (min-width:768px) and (hover:none){.pc-h-tap{display:inline}}
-@media (prefers-reduced-motion:reduce){.pc-info,.pc-toggle{transition:none!important}}
+/* visitors who reduce motion get the camera in an ordinary, unpinned section, without the rings */
+@media (prefers-reduced-motion:reduce){.pc-scroll.is-live{height:auto}.is-live .pc-pin{position:relative;height:min(640px,90vh)}.is-live .pc-rings{display:none}.pc-info,.pc-toggle{transition:none!important}}
 .ph-jump{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:20px}.ph-jump a{text-decoration:none}
 .ph-sub{scroll-margin-top:84px}
 .ph-grid{column-count:3;column-gap:14px;padding:0 40px 40px}
@@ -130,7 +158,7 @@ html[data-theme="dark"] .ph-lb{background:rgba(255,255,255,.93)}
 html[data-theme="dark"] .ph-lb figcaption{color:#1f2937}
 html[data-theme="dark"] .ph-lb button{border-color:rgba(0,0,0,.35);color:#000}
 html[data-theme="dark"] .ph-lb button:hover{background:#000;color:#fff}
-@media (max-width:767px){.pc-grid{grid-template-columns:minmax(0,1fr)}.pc-model{min-height:360px;border-right:0}.pc-toggle{bottom:16px}.pc-info{display:none;padding:22px 20px 28px;border-top:1px solid var(--line)}.pc-grid.is-open .pc-info{display:block;animation:csFade .5s cubic-bezier(.2,.7,.2,1) both}.pc-grid.no-model .pc-info{display:block}.ph-grid{column-count:2;column-gap:10px;padding:0 20px 28px}.ph-item{margin-bottom:10px}.ph-empty{gap:10px;padding:0 20px 28px}.ph-lb{padding:64px 12px}.ph-lb .p,.ph-lb .n{top:auto;bottom:14px;margin:0}.ph-lb .p{left:calc(50% - 52px)}.ph-lb .n{right:calc(50% - 52px)}}
+@media (max-width:767px){.ph-grid{column-count:2;column-gap:10px;padding:0 20px 28px}.ph-item{margin-bottom:10px}.ph-empty{gap:10px;padding:0 20px 28px}.ph-lb{padding:64px 12px}.ph-lb .p,.ph-lb .n{top:auto;bottom:14px;margin:0}.ph-lb .p{left:calc(50% - 52px)}.ph-lb .n{right:calc(50% - 52px)}}
 .about-grid>div{padding:40px}.about-grid>div+div{border-left:1px solid var(--line)}
 .about-name{font-size:clamp(48px,7vw,84px);line-height:1;letter-spacing:-.02em;color:#000;margin:0 0 20px}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 28px}
@@ -175,7 +203,27 @@ html[data-theme="dark"] .ph-lb button:hover{background:#000;color:#fff}
 .sb-row{all:unset;box-sizing:border-box;display:flex;flex-direction:column;gap:3px;width:100%;padding:11px 0;cursor:pointer;font-family:FunnelDisplay,sans-serif;transition:padding .2s}
 .sb-row b{font-weight:400;font-size:14px;color:#111827}.sb-row span{font-size:12px;color:#9ca3af}.sb-row:hover{padding-left:8px}
 .sb-row:focus-visible,.sb-tile:focus-visible,.sb-x:focus-visible,.sb-bar:focus-visible,.sb-crown:focus-visible{outline:2px solid #3b82f6;outline-offset:2px}
-.sb-stage{display:flex;align-items:center;justify-content:center;min-height:520px;padding:56px 28px;background-color:#fff;background-image:radial-gradient(#e5e7eb 1px,transparent 1px);background-size:18px 18px;overflow:hidden}
+.sb-stage{position:relative;box-sizing:border-box;display:flex;align-items:center;justify-content:center;min-height:520px;padding:56px 28px;background-color:#fff;background-image:radial-gradient(#e5e7eb 1px,transparent 1px);background-size:18px 18px;overflow:hidden}
+/* full screen: tapping a device lifts its panel to fill the window and scales the device up to fit it; apps then run on it as before */
+.sb-fs{position:absolute;top:14px;right:14px;z-index:3;width:34px;height:34px;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);background:#fff;color:#111827;cursor:pointer;transition:background .2s,color .2s}
+.sb-fs:hover{background:#111827;color:#fff}.sb-fs:focus-visible{outline:2px solid #3b82f6;outline-offset:2px}
+.sb-fs svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+/* Back: top left, only in full screen. It goes back to the device's home screen if an app is running, and out of full screen from there */
+.sb-back{display:none;position:absolute;top:14px;left:14px;z-index:5;height:34px;padding:0 14px 0 11px;align-items:center;gap:7px;border:1px solid #111827;background:#fff;color:#111827;font-family:FunnelDisplay,sans-serif;font-size:12px;cursor:pointer;transition:background .2s,color .2s}
+.sb-back svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.sb-back:hover{background:#111827;color:#fff}.sb-back:focus-visible{outline:2px solid #3b82f6;outline-offset:2px}
+.is-full .sb-back{display:flex}.is-full .sb-fs{display:none}
+.sb-device{cursor:pointer}.is-full .sb-device{cursor:default}
+.sb-hold{min-width:0}
+html.sb-lock{overflow:hidden}
+html.sb-lock .cs-rail,html.sb-lock .cs-side{visibility:hidden}
+.sb-stage.is-full{position:fixed;z-index:400;margin:0;min-height:0;padding:64px 0 0;overflow:hidden;transition:top .5s cubic-bezier(.2,.7,.2,1),left .5s cubic-bezier(.2,.7,.2,1),width .5s cubic-bezier(.2,.7,.2,1),height .5s cubic-bezier(.2,.7,.2,1),padding .5s cubic-bezier(.2,.7,.2,1)}
+.sb-stage.is-full.is-returning{padding:56px 28px}
+.sb-stage.is-full .sb-device{width:var(--sb-w)!important;max-width:none;transition:width .5s cubic-bezier(.2,.7,.2,1)}
+@media (prefers-reduced-motion:reduce){.sb-stage.is-full,.sb-stage.is-full .sb-device{transition:none!important}}
+/* on a phone the site's menu bar spans the whole width, so Back sits just under it and the device starts below Back */
+@media (max-width:600px){.sb-stage.is-full{padding-top:108px}.sb-stage.is-full .sb-back{top:60px}}
+
 /* every device is drawn in the site's own line style: white, a thin dark outline, square-ish corners */
 .sb-device{container-type:inline-size;position:relative;color:#111827}
 .sb-screen{position:relative;overflow:hidden;background:#fff;border:1px solid #111827}
@@ -241,20 +289,19 @@ html[data-theme="dark"] .ph-lb button:hover{background:#000;color:#fff}
 .sb-crown:hover{background-color:#111827}
 .sb-side{position:absolute;left:89.4cqw;top:107cqw;width:3.4cqw;height:21cqw;border:1.5px solid #111827;border-left:0;border-radius:0 1.8cqw 1.8cqw 0;background:#fff}
 /* ---- Meta Quest 3 ---- */
-.sb-quest{display:flex;align-items:center;width:min(580px,100%)}
-.sb-visor{position:relative;flex:1;min-width:0;padding:3.4cqw 3.4cqw 4.6cqw;border:1.5px solid #111827;border-radius:11cqw;background:#fff}
-.sb-quest .sb-screen{aspect-ratio:2/1;border-radius:8cqw;background:#fafafa}
-.sb-strap{flex:none;width:11cqw;height:23cqw;border:1.5px solid #111827;background:#fff;background-image:repeating-linear-gradient(90deg,transparent 0 2cqw,#e5e7eb 2cqw calc(2cqw + 1px))}
-.sb-strap.l{margin-right:-1.5px;border-radius:5cqw 0 0 5cqw}.sb-strap.r{margin-left:-1.5px;border-radius:0 5cqw 5cqw 0}
-.sb-sensor{position:absolute;top:.9cqw;width:1.5cqw;height:1.5cqw;border:1px solid #111827;border-radius:50%}
-.sb-sensor.s1{left:14%}.sb-sensor.s2{left:22%}.sb-sensor.s3{right:22%}.sb-sensor.s4{right:14%}
-.sb-nose{position:absolute;left:50%;bottom:0;width:15cqw;height:3.4cqw;margin-left:-7.5cqw;border:1.5px solid #111827;border-bottom:0;border-radius:99px 99px 0 0}
-.sb-quest .sb-status{top:2.6cqw;justify-content:center;padding:0;font-size:max(8px,1.7cqw)}
-.sb-quest .sb-home{top:6cqw;bottom:9cqw;grid-template-columns:repeat(6,minmax(0,1fr));gap:2cqw;padding:0 7cqw;align-content:center}
-.sb-quest .sb-ic{border-radius:2.2cqw}.sb-quest .sb-ic span{font-size:3.2cqw}.sb-quest .sb-tile b{font-size:max(8px,1.5cqw)}
-.sb-quest .sb-view{inset:6cqw 8cqw 9.4cqw;border:1px solid #111827;border-radius:2cqw;box-shadow:0 1.6cqw 3.4cqw rgba(17,24,39,.16)}
-.sb-meta{all:unset;box-sizing:border-box;position:absolute;left:50%;bottom:2cqw;z-index:4;width:6.4cqw;height:4.6cqw;margin-left:-3.2cqw;display:flex;align-items:center;justify-content:center;border:1px solid #111827;border-radius:99px;background:#fff;cursor:pointer;transition:background-color .2s}
-.sb-meta i{display:block;width:2.4cqw;height:1.3cqw;border:1px solid #111827;border-radius:99px;transition:border-color .2s}
+.sb-quest{width:min(580px,100%);aspect-ratio:2/1}
+.sb-svg .q-shell,.sb-svg .q-strap{fill:#fff;stroke:#111827;stroke-width:1.5px;stroke-linejoin:round}
+.sb-svg .q-plate{fill:#fff;stroke:none}
+.sb-svg .q-rib{stroke:#e5e7eb;stroke-width:1px;fill:none}
+.sb-svg .q-line{fill:none;stroke:#111827;stroke-width:1px}
+.sb-quest .sb-screen{position:absolute;left:13.6cqw;top:6.6cqw;width:72.8cqw;height:32.4cqw;border:0;border-radius:11cqw;background:#fafafa}
+.sb-quest .sb-status{top:2.4cqw;justify-content:center;padding:0;font-size:max(8px,1.7cqw)}
+.sb-quest .sb-home{top:7cqw;bottom:8.5cqw;left:15.5cqw;right:15.5cqw;grid-template-columns:repeat(4,minmax(0,1fr));gap:2cqw;padding:0;align-content:center}
+.sb-quest .sb-ic{border-radius:2cqw}.sb-quest .sb-ic span{font-size:2.8cqw}.sb-quest .sb-tile b{font-size:max(8px,1.45cqw)}
+.sb-quest .sb-view{inset:5.4cqw 15.5cqw 7.4cqw;border:1px solid #111827;border-radius:1.6cqw;box-shadow:0 1.4cqw 3cqw rgba(17,24,39,.2)}
+.sb-quest .sb-frame{border-radius:inherit}
+.sb-meta{all:unset;box-sizing:border-box;position:absolute;left:50%;bottom:1.6cqw;z-index:4;width:5.6cqw;height:3.8cqw;margin-left:-2.8cqw;display:flex;align-items:center;justify-content:center;border:1px solid #111827;border-radius:99px;background:#fff;cursor:pointer;transition:background-color .2s}
+.sb-meta i{display:block;width:2cqw;height:1.1cqw;border:1px solid #111827;border-radius:99px;transition:border-color .2s}
 .sb-meta:hover{background:#111827}.sb-meta:hover i{border-color:#fff}
 .sb-meta:focus-visible{outline:2px solid #3b82f6;outline-offset:2px}
 /* ---- colour: a device keeps its line-art look until the pointer is over it (or it has focus, or an app is open, or the
@@ -299,13 +346,12 @@ html[data-theme="dark"] .ph-lb button:hover{background:#000;color:#fff}
 .sb-watch.is-hot .sb-slot b{color:rgba(255,255,255,.55)}
 .sb-watch.is-hot .sb-crown,.sb-watch.is-hot .sb-side{background-color:#d3d6db;border-color:#8f959e}
 .sb-watch.is-hot .sb-crown:hover{background-color:#9aa0a8}
-/* Horizon OS */
-.sb-quest .sb-screen:before{background:radial-gradient(120% 110% at 50% 0%,#3d8bff 0%,#0f4fc9 46%,#071a45 100%)}
-.sb-quest.is-hot .sb-visor{background:#f1f2f4;border-color:#9aa0a8}
-.sb-quest.is-hot .sb-screen{border-color:#0a0a0c}
-.sb-quest.is-hot .sb-strap{background-color:#e5e7eb;border-color:#9aa0a8}
-.sb-quest.is-hot .sb-sensor{background:#111827;border-color:#111827}
-.sb-quest.is-hot .sb-nose{border-color:#9aa0a8}
+/* Horizon OS: a white headset with a black front plate that shows Meta blue */
+.sb-quest .sb-screen:before{background:radial-gradient(120% 130% at 50% 0%,#3d8bff 0%,#0f4fc9 46%,#071a45 100%)}
+.sb-quest.is-hot .q-shell{fill:#f1f2f4;stroke:#9aa0a8}
+.sb-quest.is-hot .q-strap{fill:#dfe2e7;stroke:#9aa0a8}
+.sb-quest.is-hot .q-rib{stroke:#c6cbd3}
+.sb-quest.is-hot .q-plate{fill:#05070f}.sb-quest.is-hot .q-line{stroke:#05070f}
 .sb-quest.is-hot .sb-status{color:#fff}
 .sb-quest.is-hot .sb-meta{background:rgba(255,255,255,.18);border-color:#fff}.sb-quest.is-hot .sb-meta i{border-color:#fff}
 .sb-quest.is-hot .sb-meta:hover{background:rgba(255,255,255,.4)}
