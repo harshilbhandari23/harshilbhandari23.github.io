@@ -805,7 +805,7 @@ function start() {
     /* the rings of photographs: a twelve-sided drum, sized to stand clear of the camera and the particles, and spaced
        so that the camera shows between one ring and the next */
     ringR = Math.round(Math.min(w * (w < 600 ? 0.45 : 0.36), h * 0.42, 340));
-    const panelW = 2 * ringR * Math.tan(Math.PI / 12), panelH = panelW * 0.7, band = Math.max(11, panelW * 0.1);
+    const panelW = 2 * ringR * Math.tan(Math.PI / 12), panelH = panelW * 0.86, band = Math.max(11, panelW * 0.1);
     ringReach = panelH / 2 + band + 6;
     ringPitch = panelH * 2.5 + band * 2;
     grid.style.setProperty('--R', ringR + 'px');
